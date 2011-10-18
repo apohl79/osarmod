@@ -3,6 +3,9 @@ gapps*
 kernel/samsung-kernel-aries/
 kernel/bootimg/system/lib/modules/*
 kernel/bootimg/boot.img
-kernel/ramdisk*
+kernel/helper-files/ramdisk-recovery.img
+kernel/helper-files/ramdisk-recovery/
+kernel/helper-files/ramdisk.img
+kernel/helper-files/ramdisk/
 kernel/helper-files/logo/logo_rgb24_wvga_portrait.h
 system/
