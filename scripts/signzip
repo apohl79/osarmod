@@ -1,0 +1,2 @@
+#!/bin/bash
+java -Xmx512m -jar $ANDROID_BUILD_TOP/out/host/linux-x86/framework/signapk.jar -w $ANDROID_BUILD_TOP/build/target/product/security/testkey.x509.pem $ANDROID_BUILD_TOP/build/target/product/security/testkey.pk8 $*
