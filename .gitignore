@@ -1,6 +1,7 @@
 build/
 gapps*
 kernel/samsung-kernel-aries/
+kernel/osarmod-cm-kernel/
 kernel/bootimg/system/lib/modules/*
 kernel/bootimg/boot.img
 kernel/helper-files/ramdisk-recovery.img
