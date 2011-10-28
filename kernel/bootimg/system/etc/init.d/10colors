@@ -1,0 +1,14 @@
+#!/system/bin/sh
+#
+# OSARMOD warm color scheme
+#
+
+R=4200000000
+G=3500000000
+B=3300000000
+
+SYS=/sys/devices/virtual/misc/color_tuning
+
+echo $R > $SYS/red_multiplier
+echo $G > $SYS/green_multiplier
+echo $B > $SYS/blue_multiplier
