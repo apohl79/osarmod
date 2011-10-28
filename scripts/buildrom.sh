@@ -1,7 +1,7 @@
 #!/bin/bash
 
 GAPPS=$HOME/android/gapps
-AAPPS=$HOME/android/aapps
+ROMROOT=$HOME/android/romroot
 MODEL=`echo -n $TARGET_PRODUCT|sed 's/cyanogen_//'`
 DATE=`date +%Y%m%d`
 TARGET=$HOME/android/build/cm-osar-$MODEL-$DATE-signed.zip
@@ -61,10 +61,10 @@ rm -f $REPACK/system/app/Pacman.apk
 rm -f $REPACK/system/app/Protips.apk
 rm -f $REPACK/system/app/Talk.apk
 
-echo "Adding additional Apps..."
+echo "Adding additional files..."
 
-cp -r $AAPPS/common/* $REPACK
-cp -r $AAPPS/$MODEL/* $REPACK
+cp -r $ROMROOT/common/* $REPACK
+cp -r $ROMROOT/$MODEL/* $REPACK
 
 echo "Setting ROM version to: $VERSION"
 cat $REPACK/system/build.prop | sed -e "s/\(ro.modversion=.*\)/\\1-$VERSION/" > $REPACK/system/build.prop.new
