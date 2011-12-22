@@ -1,0 +1,3 @@
+post-build=Android/full_wingray/wingray:4.0.3.0.2.0.1.0/OPENMASTER/eng.osar.20111218.172819:userdebug/test-keys
+post-timestamp=1324229335
+pre-device=wingray
