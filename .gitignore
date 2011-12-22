@@ -1,4 +1,5 @@
 build/
+cross/
 gapps*
 kernel/samsung-kernel-aries/
 kernel/osarmod-cm-kernel/
@@ -9,4 +10,12 @@ kernel/helper-files/ramdisk-recovery/
 kernel/helper-files/ramdisk.img
 kernel/helper-files/ramdisk/
 kernel/helper-files/logo/logo_rgb24_wvga_portrait.h
+kernel/darkcore/
+kernel/motorola-kernel-defy/
+kernel/xoom-debian/
 system/
+system_aosp_ics/
+system_ics/
+toolchain/
+VERSION_*
+xoom/
