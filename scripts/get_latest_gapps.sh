@@ -1,24 +1,38 @@
 #!/bin/bash
 
-URL=http://cmw.22aaf3.com/gapps/
+TYPE=$1
+case $TYPE in
+    gb)
+	URL=http://cmw.22aaf3.com/gapps/
+	;;
+    ics)
+	URL=http://download.clockworkmod.com/test/
+	;;
+    *)
+	echo "$0 {gb|ics}"
+	exit
+	;;
+esac
+
 DIR=$HOME/android
 
 # get latest gapps package
-LATEST_GAPPS=$(curl -s $URL | perl -ne 'if (/(gapps-gb-[0-9]+-signed.zip)/) {print $1."\n"}' | sort | tail -1)
-LATEST_GAPPS_MD5=$(echo $LATEST_GAPPS | sed s/zip$/md5/)
+LATEST_GAPPS=$(curl -s $URL | perl -ne 'if (/(gapps-(ics|gb)-[0-9]+(-signed)?.zip)/) {print $1."\n"}' | sort | tail -1)
+
+if [ -e $DIR/$LATEST_GAPPS ]; then
+    echo "$LATEST_GAPPS is up to date."
+    exit
+fi
 
 echo $LATEST_GAPPS  
 curl $URL$LATEST_GAPPS -o $DIR/$LATEST_GAPPS
-echo $LATEST_GAPPS_MD5
-curl $URL$LATEST_GAPPS_MD5 -o $DIR/$LATEST_GAPPS_MD5
 
-# md5sum -c doesn't work because the md5 sumfiles are broken
-MD5=$(cat $DIR/$LATEST_GAPPS_MD5 | grep gapps-gb | awk '{print $1}')
-MD5_check=$(md5sum $DIR/$LATEST_GAPPS | awk '{print $1}')
-if [ "$MD5" = "$MD5_check" ]; then
-    echo "Unpacking to $DIR/gapps..."
-    rm -rf $DIR/gapps
-    unzip $DIR/$LATEST_GAPPS -d $DIR/gapps
-else
-    echo "ERROR: MD5 mismatch: $MD5 != $MD5_check"
-fi
+echo "Unpacking to $DIR/gapps..."
+rm -rf $DIR/gapps_$TYPE
+unzip -o $DIR/$LATEST_GAPPS -d $DIR/gapps_$TYPE
+
+echo "Removing unwanted apk's..."
+for f in $(cat REMOVE_GAPPS_FILES_$TYPE); do
+    echo "  [-] $f"
+    rm -f $DIR/gapps_$TYPE/system/app/$f   
+done
