@@ -15,13 +15,13 @@ case $N in
     1)
 	target=galaxysmtd
 	init=breakfast
-	system=android/system
+	system=android/system_gb
 	osarmod=galaxysmtd-cm7
 	;;
     2)
 	target=galaxys2
 	init=breakfast
-	system=android/system
+	system=android/system_gb
 	osarmod=galaxys2-cm7
 	;;
     3)
