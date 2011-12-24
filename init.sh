@@ -16,16 +16,19 @@ case $N in
 	target=galaxysmtd
 	init=breakfast
 	system=android/system
+	osarmod=galaxysmtd-cm7
 	;;
     2)
 	target=galaxys2
 	init=breakfast
 	system=android/system
+	osarmod=galaxys2-cm7
 	;;
     3)
 	target=full_wingray-userdebug
 	init=lunch
 	system=android/system_aosp_ics
+	osarmod=wingray-ics-aosp
 	;;
     *)
 	target=none
@@ -40,6 +43,7 @@ else
     . build/envsetup.sh
     $init $target
     ./prebuilt/linux-x86/ccache/ccache -M 50G
+    export OSARMOD_TYPE=$osarmod
 fi
 
 export PROMPT_COMMAND="echo -ne \"\033]0;[${TARGET_PRODUCT}] \$PWD\007\""
