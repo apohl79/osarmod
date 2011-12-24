@@ -1,0 +1,10 @@
+#!/system/bin/sh
+# 2011-12-21 - apohl79@gmail.com  
+# apply low memory killer settings
+         
+# strict 
+echo "1536,2048,4096,15360,17920,20480" > /sys/module/lowmemorykiller/parameters/minfree
+        
+# optimum
+#echo "1536,2048,4096,10240,12800,15360" > /sys/module/lowmemorykiller/parameters/minfree
+ 
