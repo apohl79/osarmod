@@ -19,3 +19,5 @@ system_ics/
 toolchain/
 VERSION_*
 xoom/
+osarmod/wingray_bootimg/out*
+osarmod/wingray_bootimg/*.img
