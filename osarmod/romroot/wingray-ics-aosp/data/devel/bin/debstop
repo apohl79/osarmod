@@ -1,0 +1,15 @@
+#!/system/bin/sh
+
+if [ -n "`mount|grep loop0`" ]; then
+    echo -n "Unmountung debian chroot ... "
+    umount /data/devel/debian/sys
+    umount /data/devel/debian/dev/pts
+    umount /data/devel/debian/proc
+    umount /data/devel/debian/sdcard
+    umount /data/devel/debian/external
+    umount /data/devel/debian/android/data
+    umount /data/devel/debian/android/system
+    umount /data/devel/debian
+    echo "done"
+fi
+

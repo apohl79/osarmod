@@ -1,0 +1,13 @@
+#!/system/bin/sh
+
+if [ -z "`mount|grep loop0`" ]; then 
+    debstart
+fi
+
+export PATH=/usr/bin:/usr/sbin:/bin:$PATH
+export SHELL=/bin/bash
+export TERM=linux
+export HOME=/root
+export USER=root
+
+busybox chroot /data/devel/debian/ /bin/bash

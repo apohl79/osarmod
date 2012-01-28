@@ -1,0 +1,22 @@
+#!/system/bin/sh
+
+if [ -n "`mount|grep loop0`" ]; then 
+    exit
+fi
+
+echo -n "Mounting debian chroot ... "
+
+if [ ! -e /dev/loop0 ]
+then
+    ln /dev/block/loop0 /dev/loop0
+fi
+mount -o loop -t ext4 /sdcard/debian/debian.img /data/devel/debian
+busybox mount -o bind /sdcard /data/devel/debian/sdcard
+busybox mount -o bind /mnt/external1 /data/devel/debian/external
+busybox mount -o bind /data /data/devel/debian/android/data
+busybox mount -o bind /system /data/devel/debian/android/system
+busybox mount -t proc none /data/devel/debian/proc
+busybox mount -t sysfs sysfs /data/devel/debian/sys
+busybox mount -t devpts devpts /data/devel/debian/dev/pts
+
+echo "done"
