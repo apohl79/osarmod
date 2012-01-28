@@ -2,7 +2,8 @@
 
 setkernelversion.sh
 
-MODEL=$(echo -n $TARGET_PRODUCT|sed 's/cyanogen_//'|sed 's/full_//')
+#MODEL=$(echo -n $TARGET_PRODUCT|sed 's/cyanogen_//'|sed 's/full_//')
+MODEL=$OSARMOD_DEVICE
 case $MODEL in
     galaxysmtd)
 	KERNEL_DIR=$HOME/android/kernel/osarmod-cm-kernel
@@ -16,12 +17,12 @@ case $MODEL in
 esac
 
 VERSION_NAME=osarmod
-VERSION_NUM=`cat $HOME/android/VERSION_KERNEL_$TARGET_PRODUCT`
-BOOTIMG_OUT=$HOME/android/build
-ROMROOT_DIR=$HOME/android/romroot
+VERSION_NUM=`cat $HOME/android/osarmod/files/VERSION_KERNEL_$OSARMOD_TYPE`
+BOOTIMG_OUT=$HOME/android/build/$OSARMOD_TYPE
+ROMROOT_DIR=$HOME/android/osarmod/romroot
 HELPER_DIR=$HOME/android/kernel/helper-files
 BUILD_DIR="$KERNEL_DIR/build"
-FLASH_ZIP="$BOOTIMG_OUT/$OSARMOD_TYPE-kernel"
+FLASH_ZIP="$BOOTIMG_OUT/osarmod-$OSARMOD_OS-kernel"
 
 build ()
 {

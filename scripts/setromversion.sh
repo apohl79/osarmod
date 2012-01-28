@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VER_FILE=$HOME/android/VERSION_ROM_$TARGET_PRODUCT
+VER_FILE=$HOME/android/osarmod/files/VERSION_ROM_$OSARMOD_TYPE
 VER=$(cat $VER_FILE)
 
 BASE=$(cat $VER_FILE|awk -F. '{print $1"."$2}')
