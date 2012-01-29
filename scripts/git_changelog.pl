@@ -2,6 +2,7 @@
 
 use strict;
 
+my $maxrows = 15;
 my $topdir = `pwd`;
 my $in = $ARGV[0];
 shift @ARGV;
@@ -62,8 +63,9 @@ sub git_log {
       }
       if ($show) {
 	print "*** $opwd\n";
+	my $c = 0;
 	foreach my $l (split /\n/, $nlog) {
-	  if ($l ne $in_log->{$pwd}) {
+	  if ($l ne $in_log->{$pwd} && $c++ < $maxrows) {
 	    print "$l\n";
 	  } else {
 	    last;
