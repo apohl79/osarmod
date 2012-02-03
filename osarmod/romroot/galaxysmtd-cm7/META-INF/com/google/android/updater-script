@@ -29,7 +29,9 @@ package_extract_file("system/bin/backuptool.sh", "/tmp/backuptool.sh");
 set_perm(0, 0, 0777, "/tmp/backuptool.sh");
 run_program("/tmp/backuptool.sh", "backup");
 show_progress(0.500000, 0);
+ui_print("Formating /system...");
 format("yaffs2", "MTD", "system");
+ui_print("Installing system files...");
 mount("yaffs2", "MTD", "system", "/system");
 package_extract_dir("recovery", "/system");
 package_extract_dir("system", "/system");
@@ -166,6 +168,7 @@ package_extract_file("system/bin/verify_cache_partition_size.sh", "/tmp/verify_c
 set_perm(0, 0, 0777, "/tmp/verify_cache_partition_size.sh");
 run_program("/tmp/verify_cache_partition_size.sh");
 show_progress(0.200000, 10);
+ui_print("Installing boot image...");
 assert(run_program("/tmp/erase_image", "boot"));
 assert(package_extract_file("boot.img", "/tmp/boot.img"),
        run_program("/tmp/bml_over_mtd.sh", "boot", "72", "reservoir", "2004", "/tmp/boot.img"),
