@@ -108,18 +108,21 @@ echo "Setting ROM version to: $VERSION"
 case $OSARMOD_OS in
     cm7)
 	cat $REPACK/system/build.prop | sed -e "s/\(ro.modversion=.*\)/ro.modversion=$VERSION/" > $REPACK/system/build.prop.new
-	mv $REPACK/system/build.prop.new $REPACK/system/build.prop
 	;;
     cm9)
 	cat $REPACK/system/build.prop | sed -e "s/\(ro.cm.version=.*\)/ro.cm.version=$VERSION/" > $REPACK/system/build.prop.new
-	mv $REPACK/system/build.prop.new $REPACK/system/build.prop
 	;;
     *)
 	BUILD_ID=$(cat $REPACK/system/build.prop | grep build.id | sed 's/ro.build.id=//')
 	cat $REPACK/system/build.prop | sed -e "s/\(ro.build.display.id=.*\)/ro.build.display.id=$VERSION ($BUILD_ID)/" > $REPACK/system/build.prop.new
-	mv $REPACK/system/build.prop.new $REPACK/system/build.prop
 	;;
 esac
+echo "" >> $REPACK/system/build.prop.new
+echo "# OSARMOD" >> $REPACK/system/build.prop.new
+echo "ro.osarmod.version=$VERSION_NUM" >> $REPACK/system/build.prop.new
+echo "ro.osarmod.ostype=$OSARMOD_OS" >> $REPACK/system/build.prop.new
+echo "ro.osarmod.device=$OSARMOD_DEVICE" >> $REPACK/system/build.prop.new
+mv $REPACK/system/build.prop.new $REPACK/system/build.prop
 
 echo "Repacking..."
 cd $REPACK
@@ -134,8 +137,11 @@ rm -rf $OUT/tmposarrom.zip $REPACK
 rm -f $TOP/CHANGELOG_${OSARMOD_TYPE}_NEW
 touch $TOP/CHANGELOG_${OSARMOD_TYPE}_NEW
 
-# copy changelog
+# update build dir
 mv $TOP/CHANGELOG_${OSARMOD_TYPE}_$VERSION_NUM $TOP/build/$OSARMOD_TYPE
+cp $TOP/files/VERSION_ROM_$OSARMOD_TYPE $TOP/build/$OSARMOD_TYPE/VERSION
+rm -f $TOP/build/$OSARMOD_TYPE/latest
+ln -s $TARGET $TOP/build/$OSARMOD_TYPE/latest
 
 echo "ROM finished: $TARGET"
 
