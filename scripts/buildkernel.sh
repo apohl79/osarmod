@@ -4,11 +4,16 @@ setkernelversion.sh
 
 #MODEL=$(echo -n $TARGET_PRODUCT|sed 's/cyanogen_//'|sed 's/full_//')
 MODEL=$OSARMOD_DEVICE
-case $MODEL in
-    galaxysmtd)
+case $OSARMOD_TYPE in
+    galaxysmtd-cm7)
 	KERNEL_DIR=$HOME/android/kernel/osarmod-cm-kernel
 	BOOTIMG_DIR=$HOME/android/kernel/bootimg
 	MODULES=("drivers/net/wireless/bcm4329/bcm4329.ko" "fs/cifs/cifs.ko" "fs/fuse/fuse.ko" "drivers/net/tun.ko")
+	;;
+    galaxysmtd-cm9)
+	KERNEL_DIR=$HOME/android/kernel/osarmod-cm-kernel
+	BOOTIMG_DIR=$HOME/android/kernel/bootimg
+	MODULES=("fs/cifs/cifs.ko" "fs/fuse/fuse.ko" "fs/nls/nls_utf8.ko")
 	;;
     *)
 	echo "TARGET_PRODUCT $TARGET_PRODUCT not supported"

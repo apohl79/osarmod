@@ -5,9 +5,10 @@ export PATH=$PATH:$HOME/android/scripts
 echo "Target device selection:"
 echo ""
 echo "  [1] Galaxy S - CM7"
-echo "  [2] Galaxy S II - CM7"
-echo "  [3] Xoom (US WiFi) - ICS/AOSP"
-echo "  [4] Xoom (US WiFi) - CM9"
+echo "  [2] Galaxy S - CM9"
+echo "  [3] Galaxy S II - CM7"
+echo "  [4] Xoom (US WiFi) - ICS/AOSP"
+echo "  [5] Xoom (US WiFi) - CM9"
 #echo "  [5] Xoom (US WiFi) - ICS/EOS"
 echo ""
 echo -n "Choose target [none]: "
@@ -23,6 +24,14 @@ case $N in
 	os=cm7
 	;;
     2)
+	target=galaxysmtd
+	init=breakfast
+	system=android/system_ics
+	device=galaxysmtd
+	device_common=aries-common
+	os=cm9
+	;;
+    3)
 	target=galaxys2
 	init=breakfast
 	system=android/system_gb
@@ -30,7 +39,7 @@ case $N in
 	device_common=c1-common
 	os=cm7
 	;;
-    3)
+    4)
 	target=full_wingray-userdebug
 	init=lunch
 	system=android/system_aosp_ics
@@ -38,21 +47,13 @@ case $N in
 	device_common=moto/common
 	os=ics-aosp
 	;;
-    4)
+    5)
 	target=wingray
 	init=breakfast
 	system=android/system_ics
 	device=wingray
 	device_common=moto/common
 	os=cm9
-	;;
-    5)
-	target=full_wingray-userdebug
-	init=lunch
-	system=android/system_eos_ics
-	device=wingray
-	device_common=moto/common
-	os=ics-eos
 	;;
     *)
 	target=none
@@ -80,7 +81,8 @@ alias goto_system="cd $HOME/$system"
 alias goto_romroot="cd $HOME/android/osarmod/romroot/$OSARMOD_TYPE"
 alias goto_osarmod="cd $HOME/android/osarmod"
 alias goto_build="cd $HOME/android/build"
+alias goto_kernel="cd $HOME/android/kernel/osarmod-cm-kernel"
 alias edit_changelog="emacs $HOME/android/osarmod/CHANGELOG_${OSARMOD_TYPE}_NEW"
 alias edit_romversion="emacs $HOME/android/osarmod/VERSION_ROM_${OSARMOD_TYPE}"
-alias rs="repo sync -j16"
+alias rs="cd packages/apps/OMParts; git pull origin master; cd -; repo sync -j16"
 alias sc="show_changelog.sh | less"

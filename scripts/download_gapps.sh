@@ -16,7 +16,7 @@ rm -rf $DIR/gapps_$OSARMOD_TYPE
 unzip -o $DIR/$FILE -d $DIR/gapps_$OSARMOD_TYPE
 
 echo "Removing unwanted apk's..."
-for f in $(cat $DIR/REMOVE_GAPPS_FILES_$OSARMOD_TYPE); do
+for f in $(cat $DIR/files/REMOVE_GAPPS_FILES_$OSARMOD_TYPE); do
     echo "  [-] $f"
     rm -f $DIR/gapps_$OSARMOD_TYPE/system/app/$f   
 done

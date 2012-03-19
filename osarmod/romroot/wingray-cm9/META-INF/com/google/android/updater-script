@@ -127,3 +127,6 @@ set_perm(0, 0, 0777, "/tmp/backuptool.sh");
 run_program("/tmp/backuptool.sh", "restore");
 package_extract_file("boot.img", "/dev/block/platform/sdhci-tegra.3/by-name/boot");
 unmount("/system");
+run_program("/sbin/mount", "/data");
+package_extract_dir("data", "/data");
+unmount("/data");

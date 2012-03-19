@@ -31,20 +31,31 @@ if [ "$1" != "-nocompile" ]; then
     cd $ANDROID_BUILD_TOP
     show_changelog.sh > /tmp/CHANGELOG
     echo "Updating ROM version..."
-    setromversion.sh
+    if [ "$DEVBUILD" != "1" ]; then
+	setromversion.sh
+    fi
     VERSION_NUM_OLD=$VERSION_NUM
     VERSION_NUM=$(cat $TOP/files/VERSION_ROM_$OSARMOD_TYPE)
-    mv /tmp/CHANGELOG $TOP/CHANGELOG_${OSARMOD_TYPE}_$VERSION_NUM
     echo "Generating changelog..."
     # set new version and store new git hashes
-    git_changelog.pl > $TOP/files/GIT_LOG_${OSARMOD_TYPE}_$VERSION_NUM
+    git_changelog.pl > /tmp/GIT_LOG
 fi
 
 VERSION_NUM=$(cat $TOP/files/VERSION_ROM_$OSARMOD_TYPE)
-VERSION=osarmod-${OSARMOD_OS}-$VERSION_NUM
 GAPPS=$TOP/gapps_$OSARMOD_TYPE
 GAPPS_ALT=$TOP/gapps_$OSARMOD_OS
-TARGET=$TOP/build/$OSARMOD_TYPE/osarmod-${OSARMOD_OS}-rom-$MODEL-$VERSION_NUM-signed.zip
+if [ "$DEVBUILD" = "1" ]; then
+    N=1
+    TARGET=$TOP/build/$OSARMOD_TYPE/osarmod-${OSARMOD_OS}-rom-$MODEL-$VERSION_NUM-dev$N-signed.zip
+    while [ -e $TARGET ]; do
+	let N++
+	TARGET=$TOP/build/$OSARMOD_TYPE/osarmod-${OSARMOD_OS}-rom-$MODEL-$VERSION_NUM-dev$N-signed.zip
+    done
+    VERSION_NUM=$VERSION_NUM-dev$N
+else
+    TARGET=$TOP/build/$OSARMOD_TYPE/osarmod-${OSARMOD_OS}-rom-$MODEL-$VERSION_NUM-signed.zip
+fi
+VERSION=osarmod-${OSARMOD_OS}-$VERSION_NUM
 
 #
 # COMPILE
@@ -134,14 +145,22 @@ signzip $OUT/tmposarrom.zip $TARGET
 
 # cleanup
 rm -rf $OUT/tmposarrom.zip $REPACK
-rm -f $TOP/CHANGELOG_${OSARMOD_TYPE}_NEW
-touch $TOP/CHANGELOG_${OSARMOD_TYPE}_NEW
+if [ "$DEVBUILD" != "1" ]; then
+    rm -f $TOP/CHANGELOG_${OSARMOD_TYPE}_NEW
+    touch $TOP/CHANGELOG_${OSARMOD_TYPE}_NEW
 
-# update build dir
-mv $TOP/CHANGELOG_${OSARMOD_TYPE}_$VERSION_NUM $TOP/build/$OSARMOD_TYPE
-cp $TOP/files/VERSION_ROM_$OSARMOD_TYPE $TOP/build/$OSARMOD_TYPE/VERSION
-rm -f $TOP/build/$OSARMOD_TYPE/latest
-ln -s $TARGET $TOP/build/$OSARMOD_TYPE/latest
+    # update build dir 
+    cp $TOP/files/VERSION_ROM_$OSARMOD_TYPE $TOP/build/$OSARMOD_TYPE/VERSION
+    rm -f $TOP/build/$OSARMOD_TYPE/latest
+    ln -s $TARGET $TOP/build/$OSARMOD_TYPE/latest
+else
+    # update build dir 
+    echo $VERSION_NUM > $TOP/build/$OSARMOD_TYPE/VERSION_DEV
+    rm -f $TOP/build/$OSARMOD_TYPE/latest_dev
+    ln -s $TARGET $TOP/build/$OSARMOD_TYPE/latest_dev
+fi
+mv /tmp/CHANGELOG $TOP/build/$OSARMOD_TYPE/CHANGELOG_${OSARMOD_TYPE}_$VERSION_NUM
+mv /tmp/GIT_LOG $TOP/files/GIT_LOG_${OSARMOD_TYPE}_$VERSION_NUM
 
 echo "ROM finished: $TARGET"
 
