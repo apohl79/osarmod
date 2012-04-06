@@ -17,3 +17,4 @@ echo "-----------" >> $CHANGELOG_TMP
 git_changelog.pl $GIT_LOG $OSARMOD_DEVICE $OSARMOD_DEVICE_COMMON >> $CHANGELOG_TMP
 
 cat $CHANGELOG_TMP
+
