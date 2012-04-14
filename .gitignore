@@ -21,3 +21,5 @@ VERSION_*
 xoom/
 osarmod/wingray_bootimg/out*
 osarmod/wingray_bootimg/*.img
+osarmod/files/GIT_LOG*
+osarmod/CHANGELOG*
