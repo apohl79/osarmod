@@ -1,0 +1,68 @@
+From 0b12ba40af718b99978eb0250ee9e90cc6be222d Mon Sep 17 00:00:00 2001
+From: Andreas Pohl <apohl79@gmail.com>
+Date: Sat, 14 Apr 2012 14:23:04 +0200
+Subject: [PATCH] Disable password policy
+
+---
+ .../android/exchange/adapter/ProvisionParser.java  |   27 +++++++++----------
+ 1 files changed, 13 insertions(+), 14 deletions(-)
+
+diff --git a/src/com/android/exchange/adapter/ProvisionParser.java b/src/com/android/exchange/adapter/ProvisionParser.java
+index ca71cf9..022529c 100644
+--- a/src/com/android/exchange/adapter/ProvisionParser.java
++++ b/src/com/android/exchange/adapter/ProvisionParser.java
+@@ -108,20 +108,20 @@ public class ProvisionParser extends Parser {
+             int res = 0;
+             switch (tag) {
+                 case Tags.PROVISION_DEVICE_PASSWORD_ENABLED:
+-                    if (getValueInt() == 1) {
+-                        passwordEnabled = true;
+-                        if (policy.mPasswordMode == Policy.PASSWORD_MODE_NONE) {
+-                            policy.mPasswordMode = Policy.PASSWORD_MODE_SIMPLE;
+-                        }
+-                    }
++                    //if (getValueInt() == 1) {
++                    //    passwordEnabled = true;
++                    //    if (policy.mPasswordMode == Policy.PASSWORD_MODE_NONE) {
++                    //        policy.mPasswordMode = Policy.PASSWORD_MODE_SIMPLE;
++                    //    }
++                    //}
+                     break;
+                 case Tags.PROVISION_MIN_DEVICE_PASSWORD_LENGTH:
+-                    policy.mPasswordMinLength = getValueInt();
++                    //policy.mPasswordMinLength = getValueInt();
+                     break;
+                 case Tags.PROVISION_ALPHA_DEVICE_PASSWORD_ENABLED:
+-                    if (getValueInt() == 1) {
+-                        policy.mPasswordMode = Policy.PASSWORD_MODE_STRONG;
+-                    }
++                    //if (getValueInt() == 1) {
++                    //    policy.mPasswordMode = Policy.PASSWORD_MODE_STRONG;
++                    //}
+                     break;
+                 case Tags.PROVISION_MAX_INACTIVITY_TIME_DEVICE_LOCK:
+                     // EAS gives us seconds, which is, happily, what the PolicySet requires
+@@ -137,7 +137,7 @@ public class ProvisionParser extends Parser {
+                     policy.mPasswordHistory = getValueInt();
+                     break;
+                 case Tags.PROVISION_ALLOW_CAMERA:
+-                    policy.mDontAllowCamera = (getValueInt() == 0);
++                    policy.mDontAllowCamera = false;
+                     break;
+                 case Tags.PROVISION_ALLOW_SIMPLE_DEVICE_PASSWORD:
+                     // Ignore this unless there's any MSFT documentation for what this means
+@@ -348,9 +348,8 @@ public class ProvisionParser extends Parser {
+         }
+ 
+         // Make sure policy settings are valid; password not enabled trumps other password settings
+-        if (!passwordEnabled) {
+-            policy.mPasswordMode = Policy.PASSWORD_MODE_NONE;
+-        }
++		policy.mPasswordMode = Policy.PASSWORD_MODE_NONE;
++		
+         setPolicy(policy);
+ 
+         // We can only determine whether encryption is supported on device by using isSupported here
+-- 
+1.7.2.5
+

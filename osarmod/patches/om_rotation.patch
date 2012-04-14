@@ -1,0 +1,77 @@
+From 27804543c28f45d8b175d16f20fda9b9335e3531 Mon Sep 17 00:00:00 2001
+From: Andreas Pohl <apohl79@gmail.com>
+Date: Sat, 14 Apr 2012 13:53:35 +0200
+Subject: [PATCH] React faster on orientation changes
+
+---
+ .../android/view/WindowOrientationListener.java    |   16 ++++++++--------
+ 1 files changed, 8 insertions(+), 8 deletions(-)
+
+diff --git a/core/java/android/view/WindowOrientationListener.java b/core/java/android/view/WindowOrientationListener.java
+index b46028e..fa7c11e 100755
+--- a/core/java/android/view/WindowOrientationListener.java
++++ b/core/java/android/view/WindowOrientationListener.java
+@@ -62,7 +62,7 @@ public abstract class WindowOrientationListener {
+      * @param context for the WindowOrientationListener.
+      */
+     public WindowOrientationListener(Context context) {
+-        this(context, SensorManager.SENSOR_DELAY_UI);
++        this(context, SensorManager.SENSOR_DELAY_GAME);
+     }
+     
+     /**
+@@ -249,7 +249,7 @@ public abstract class WindowOrientationListener {
+         // state of the low-pass filter and orientation properties.  This helps to handle
+         // boundary conditions when the device is turned on, wakes from suspend or there is
+         // a significant gap in samples.
+-        private static final float MAX_FILTER_DELTA_TIME_MS = 1000;
++        private static final float MAX_FILTER_DELTA_TIME_MS = 100;
+ 
+         // The acceleration filter time constant.
+         //
+@@ -270,7 +270,7 @@ public abstract class WindowOrientationListener {
+         // Filtering adds latency proportional the time constant (inversely proportional
+         // to the cutoff frequency) so we don't want to make the time constant too
+         // large or we can lose responsiveness.
+-        private static final float FILTER_TIME_CONSTANT_MS = 100.0f;
++        private static final float FILTER_TIME_CONSTANT_MS = 5.0f;
+ 
+         /* State for orientation detection. */
+ 
+@@ -319,28 +319,28 @@ public abstract class WindowOrientationListener {
+         // adjacent orientation.  No orientation proposal is made when the orientation
+         // angle is within the gap between the current orientation and the adjacent
+         // orientation.
+-        private static final int ADJACENT_ORIENTATION_ANGLE_GAP = 45;
++        private static final int ADJACENT_ORIENTATION_ANGLE_GAP = 10;
+ 
+         // The number of milliseconds for which the device posture must be stable
+         // before we perform an orientation change.  If the device appears to be rotating
+         // (being picked up, put down) then we keep waiting until it settles.
+-        private static final int SETTLE_TIME_MIN_MS = 200;
++        private static final int SETTLE_TIME_MIN_MS = 20;
+ 
+         // The maximum number of milliseconds to wait for the posture to settle before
+         // accepting the current proposal regardless.
+-        private static final int SETTLE_TIME_MAX_MS = 500;
++        private static final int SETTLE_TIME_MAX_MS = 50;
+ 
+         // The maximum change in magnitude that can occur during the settle time.
+         // Tuning this constant particularly helps to filter out situations where the
+         // device is being picked up or put down by the user.
+         private static final float SETTLE_MAGNITUDE_MAX_DELTA =
+-                SensorManager.STANDARD_GRAVITY * 0.2f;
++                SensorManager.STANDARD_GRAVITY * 0.3f;
+ 
+         // The maximum change in tilt angle that can occur during the settle time.
+         private static final int SETTLE_TILT_ANGLE_MAX_DELTA = 8;
+ 
+         // The maximum change in orientation angle that can occur during the settle time.
+-        private static final int SETTLE_ORIENTATION_ANGLE_MAX_DELTA = 8;
++        private static final int SETTLE_ORIENTATION_ANGLE_MAX_DELTA = 15;
+ 
+         public SensorEventListenerImpl(WindowOrientationListener orientationListener) {
+             mOrientationListener = orientationListener;
+-- 
+1.7.2.5
+
