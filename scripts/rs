@@ -1,0 +1,27 @@
+#!/bin/bash
+
+REPOS="frameworks/base packages/apps/Settings packages/apps/Exchange"
+
+# update OMParts
+cd packages/apps/OMParts
+git pull origin master;
+cd -
+
+# stash patches
+for r in $REPOS; do
+    echo $r
+    cd $r
+    git stash
+    cd -
+done
+
+# sync
+repo sync -j16
+
+# apply patches
+for r in $REPOS; do
+    echo $r
+    cd $r
+    git stash pop
+    cd -
+done
