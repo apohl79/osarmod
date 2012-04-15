@@ -13,7 +13,7 @@ my $type = $params->{osarmod_type};
 my $ver1 = $params->{version1};
 my $ver2 = $params->{version2};
 my $showdev = 0;
-if (!defined $ver2) {
+if (!defined $ver2 || $ver2 eq "null") {
   $ver2 = $ver1;
 }
 if (index("$ver1$ver2", "-dev") > -1) {
