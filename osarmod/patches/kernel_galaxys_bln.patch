@@ -1,0 +1,268 @@
+From 09bbfe4e4e5d600b90e81afc8add0fd7b326b777 Mon Sep 17 00:00:00 2001
+From: Andreas Pohl <apohl79@gmail.com>
+Date: Thu, 8 Mar 2012 19:21:28 +0000
+Subject: [PATCH] Added bln blink support
+
+---
+ drivers/input/keyboard/cypress-touchkey.c |  175 ++++++++++++++++++++++++-----
+ 1 files changed, 144 insertions(+), 31 deletions(-)
+
+diff --git a/drivers/input/keyboard/cypress-touchkey.c b/drivers/input/keyboard/cypress-touchkey.c
+index 7972f27..11bb96b 100755
+--- a/drivers/input/keyboard/cypress-touchkey.c
++++ b/drivers/input/keyboard/cypress-touchkey.c
+@@ -30,6 +30,8 @@
+ #include <linux/input.h>
+ #include <linux/earlysuspend.h>
+ #include <linux/miscdevice.h>
++#include <linux/time.h>
++#include <linux/wakelock.h>
+ #include <linux/input/cypress-touchkey.h>
+ 
+ #define SCANCODE_MASK		0x07
+@@ -42,11 +44,38 @@
+ #define OLD_BACKLIGHT_ON	0x1
+ #define OLD_BACKLIGHT_OFF	0x2
+ 
++#define BACKLIGHT_INTERVAL  300
++
+ #define DEVICE_NAME "cypress-touchkey"
+ 
++// Define the blink pattern
++// 1 means the BL is on, 0 means it is off. The pattern repeats and is broken down to 
++// chars * BACKLIGHT_INTERVAL intervals.
++#define DEFAULT_BLN_PATTERN "101000000000000"
++
++// Blinking will be enabled only for some minutes as we need to keep the system awake
++// and we don't want to kill the battery. The value is defined in seconds.
++#define DEFAULT_BLN_BLINK_TIME 300
++
++// Define state changes
++enum {
++	BLN_STATE_UNSET,
++	BLN_STATE_ENABLE,
++	BLN_STATE_DISABLE
++};
++
+ int bl_on = 0;
+-static DEFINE_SEMAPHORE(enable_sem);
+-static DEFINE_SEMAPHORE(i2c_sem);
++
++int bln_state = 0;
++time_t bln_last_state_change = 0;
++int bln_pattern_counter = 0;
++char *bln_pattern;
++int bln_pattern_len = 0;
++int bln_blink_time = 0;
++struct wake_lock bln_wakelock;
++
++static DECLARE_MUTEX(enable_sem);
++static DECLARE_MUTEX(i2c_sem);
+ 
+ struct cypress_touchkey_devdata *bl_devdata;
+ 
+@@ -55,6 +84,10 @@ static struct timer_list bl_timer;
+ static void bl_off(struct work_struct *bl_off_work);
+ static DECLARE_WORK(bl_off_work, bl_off);
+ 
++static struct timer_list bl_blink_timer;
++static void bl_blink(struct work_struct *bl_blink_work);
++static DECLARE_WORK(bl_blink_work, bl_blink);
++
+ struct cypress_touchkey_devdata {
+ 	struct i2c_client *client;
+ 	struct input_dev *input_dev;
+@@ -148,6 +181,93 @@ void bl_timer_callback(unsigned long data)
+ 	schedule_work(&bl_off_work);
+ }
+ 
++static void bl_blink(struct work_struct *bl_blink_work)
++{
++	int next_timer = 0;
++	int next_led_state = 0;
++	int loop = 0;
++	int blink_time_over = 0;
++	u8 i2c_val = 0;
++	
++	if (unlikely(bl_devdata->is_dead))
++		return;
++
++	// Check if we reached the allowed blink time
++	blink_time_over = ((get_seconds() - bln_last_state_change) > bln_blink_time);
++
++	if (!blink_time_over && BLN_STATE_ENABLE == bln_state) {
++		// Group a row of identical blink states in the pattern
++		do {
++			next_led_state = (bln_pattern[bln_pattern_counter++] == '1');
++			next_timer += BACKLIGHT_INTERVAL;
++			if (bln_pattern_counter >= bln_pattern_len)
++				bln_pattern_counter = 0;
++			loop++;
++		} while (next_led_state == (bln_pattern[bln_pattern_counter] == '1') &&
++				 loop < bln_pattern_len);
++	}
++
++	if (blink_time_over) {
++		// let the system suspend now
++		if (wake_lock_active(&bln_wakelock)) {
++			wake_unlock(&bln_wakelock);
++		}		
++		next_led_state = (BLN_STATE_ENABLE == bln_state);
++	}
++	
++	i2c_val = next_led_state? bl_devdata->backlight_on: bl_devdata->backlight_off; 
++	
++	down(&enable_sem);
++
++	i2c_touchkey_write_byte(bl_devdata, i2c_val);
++	bl_on = next_led_state;
++	
++	up(&enable_sem);
++
++	if (next_timer > 0) {
++		mod_timer(&bl_blink_timer, jiffies + msecs_to_jiffies(next_timer));
++	}
++}
++
++void bl_blink_timer_callback(unsigned long data)
++{
++	schedule_work(&bl_blink_work);
++}
++
++void bln_change_state_to(int new_state) {
++	if (unlikely(bl_devdata->is_dead))
++		return;
++
++	switch (new_state) {
++	case BLN_STATE_ENABLE:
++		// prevent the system from going into sleep mode
++		if (!wake_lock_active(&bln_wakelock)) {
++			wake_lock(&bln_wakelock);
++		}
++		down(&enable_sem);
++		if (bl_devdata->is_sleeping) {
++			bl_devdata->pdata->touchkey_sleep_onoff(TOUCHKEY_ON);
++			bl_devdata->pdata->touchkey_onoff(TOUCHKEY_ON);
++		}
++		up(&enable_sem);
++		break;
++	case BLN_STATE_DISABLE:
++		// release the wakelock if it is active
++		if (wake_lock_active(&bln_wakelock)) {
++			wake_unlock(&bln_wakelock);
++		}
++		down(&enable_sem);
++		bl_devdata->pdata->touchkey_sleep_onoff(TOUCHKEY_OFF);
++		if (bl_devdata->is_sleeping) {
++			bl_devdata->pdata->touchkey_onoff(TOUCHKEY_OFF);
++		}
++		up(&enable_sem);
++		break;
++	}
++	bln_state = new_state;
++	bln_last_state_change = get_seconds();
++}
++
+ static void bl_set_timeout() {
+ 	if (bl_timeout > 0) {
+ 		mod_timer(&bl_timer, jiffies + msecs_to_jiffies(bl_timeout));
+@@ -259,44 +379,30 @@ static irqreturn_t touchkey_interrupt_handler(int irq, void *touchkey_devdata)
+ }
+ 
+ static void notify_led_on(void) {
+-	down(&enable_sem);
+-
+-	if (unlikely(bl_devdata->is_dead) || bl_on)
+-		goto out;
++	// Run into this method always, even if BLN is activated already, and
++	// we are still blinking, as we want to always blink for BLN_BLINK_TIME
++	// from the last notification on.
+ 
+-	if (bl_devdata->is_sleeping) {
+-		bl_devdata->pdata->touchkey_sleep_onoff(TOUCHKEY_ON);
+-		bl_devdata->pdata->touchkey_onoff(TOUCHKEY_ON);
+-	}
+-	i2c_touchkey_write_byte(bl_devdata, bl_devdata->backlight_on);
+-	bl_on = 1;
++	bln_change_state_to(BLN_STATE_ENABLE);
+ 
+ 	printk(KERN_DEBUG "%s: notification led enabled\n", __FUNCTION__);
+ 
+-out:
+-	up(&enable_sem);
++	// If the blink timer is not active anymore, trigger the call manually
++	if (bl_blink_timer.expires < jiffies)
++		schedule_work(&bl_blink_work);
+ }
+ 
+ static void notify_led_off(void) {
+-	// Avoid race condition with touch key resume
+-	down(&enable_sem);
+-
+-	if (unlikely(bl_devdata->is_dead) || !bl_on)
+-		goto out;
+-
+-	if (bl_on && bl_timer.expires < jiffies) // Don't disable if there's a timer scheduled
+-		i2c_touchkey_write_byte(bl_devdata, bl_devdata->backlight_off);
+-
+-	bl_devdata->pdata->touchkey_sleep_onoff(TOUCHKEY_OFF);
+-	if (bl_devdata->is_sleeping)
+-		bl_devdata->pdata->touchkey_onoff(TOUCHKEY_OFF);
++	if (!bln_state)
++		return;
+ 
+-	bl_on = 0;
++	bln_change_state_to(BLN_STATE_DISABLE);
+ 
+ 	printk(KERN_DEBUG "%s: notification led disabled\n", __FUNCTION__);
+ 
+-out:
+-	up(&enable_sem);
++	// If the blink timer is not active anymore, trigger the call manually
++	if (bl_blink_timer.expires < jiffies)
++		schedule_work(&bl_blink_work);
+ }
+ 
+ #ifdef CONFIG_HAS_EARLYSUSPEND
+@@ -310,7 +416,8 @@ static void cypress_touchkey_early_suspend(struct early_suspend *h)
+ 	devdata->is_powering_on = true;
+ 
+ 	if (unlikely(devdata->is_dead)) {
+-		goto out;
++		up(&enable_sem);
++		return;
+ 	}
+ 
+ 	disable_irq(devdata->client->irq);
+@@ -321,7 +428,6 @@ static void cypress_touchkey_early_suspend(struct early_suspend *h)
+ 	all_keys_up(devdata);
+ 	devdata->is_sleeping = true;
+ 
+-out:
+ 	up(&enable_sem);
+ }
+ 
+@@ -519,6 +625,11 @@ static int cypress_touchkey_probe(struct i2c_client *client,
+ 
+     bl_devdata = devdata;
+ 	setup_timer(&bl_timer, bl_timer_callback, 0);
++	setup_timer(&bl_blink_timer, bl_blink_timer_callback, 0);
++	wake_lock_init(&bln_wakelock, WAKE_LOCK_SUSPEND, "bln_wakelock");
++	bln_pattern = DEFAULT_BLN_PATTERN;
++	bln_pattern_len = strlen(bln_pattern);
++	bln_blink_time = DEFAULT_BLN_BLINK_TIME;
+ 
+ 	return 0;
+ 
+@@ -558,6 +669,8 @@ static int __devexit i2c_touchkey_remove(struct i2c_client *client)
+ 	all_keys_up(devdata);
+ 	input_unregister_device(devdata->input_dev);
+     del_timer(&bl_timer);
++    del_timer(&bl_blink_timer);
++	wake_lock_destroy(&bln_wakelock);
+ 	kfree(devdata);
+ 	return 0;
+ }
+-- 
+1.7.2.5
+
