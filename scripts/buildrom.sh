@@ -3,27 +3,29 @@
 MAILTO=ap@diepohls.com
 TOP=$HOME/android/osarmod
 ROMROOT=$TOP/romroot
-#MODEL=$(echo -n $TARGET_PRODUCT|sed 's/cyanogen_//'|sed 's/full_//')
 MODEL=$OSARMOD_DEVICE
 
-case $OSARMOD_OS in
-    cm*)
-	OTAFILE="update-cm-*.zip"
-	CLEANCMD="mka clean"
-	BUILDCMD="mka bacon"
-	export CYANOGEN_RELEASE=1 
+#
+# PREPARING THE KERNEL
+#
+case $OSARMOD_DEVICE in
+    galaxysmtd)
+	KERNEL_PATH=kernel/samsung/aries
+	KERNEL_BRANCH=ics
 	;;
-    ics-*)
-	OTAFILE="full_*.zip"
-	CLEANCMD="make clean"
-	BUILDCMD="make -j9"
-	;;
-    *)
-	echo "OSARMOD_OS $OSARMOD_OS not supported"
-	exit
+    wingray)
+	KERNEL_PATH=kernel/moto/stingray
+	KERNEL_BRANCH=ics-xoom
 	;;
 esac
 
+cd $KERNEL_PATH
+git co $KERNEL_BRANCH
+cd -
+
+#
+# VERSION AND CHANGELOG
+#
 if [ "$1" != "-nocompile" ]; then
     VERSION_NUM=$(cat $TOP/files/VERSION_ROM_$OSARMOD_TYPE)
     #GIT_LOG=$TOP/GIT_LOG_${OSARMOD_TYPE}_$VERSION_NUM
@@ -60,6 +62,24 @@ VERSION=osarmod-${OSARMOD_OS}-$VERSION_NUM
 #
 # COMPILE
 #
+case $OSARMOD_OS in
+    cm*)
+	OTAFILE="update-cm-*.zip"
+	CLEANCMD="mka clean"
+	BUILDCMD="mka bacon"
+	export CYANOGEN_RELEASE=1 
+	;;
+    ics-*)
+	OTAFILE="full_*.zip"
+	CLEANCMD="make clean"
+	BUILDCMD="make -j9"
+	;;
+    *)
+	echo "OSARMOD_OS $OSARMOD_OS not supported"
+	exit
+	;;
+esac
+
 if [ "$1" != "-nocompile" ]; then
     echo "Building Android..."
     cd $ANDROID_BUILD_TOP
@@ -114,6 +134,8 @@ done
 echo "Adding additional files..."
 cp -r $ROMROOT/common-$OSARMOD_OS/* $REPACK
 cp -r $ROMROOT/$MODEL-$OSARMOD_OS/* $REPACK
+
+cat $ROMROOT/$MODEL-${OSARMOD_OS}.ext/updater-script >> $REPACK/META-INF/com/google/android/updater-script
 
 echo "Setting ROM version to: $VERSION"
 case $OSARMOD_OS in

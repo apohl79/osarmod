@@ -14,12 +14,15 @@ case $OSARMOD_TYPE in
 	MODEL=$OSARMOD_DEVICE
 	KERNEL_DIR=$HOME/android/kernel/osarmod-cm-kernel
 	BOOTIMG_DIR=$HOME/android/kernel/bootimg_$OSARMOD_TYPE
-	MODULES=("fs/cifs/cifs.ko" "fs/fuse/fuse.ko" "fs/nls/nls_utf8.ko")
+	#MODULES=$(cat $KERNEL_DIR/build/$OSARMOD_DEVICE/modules.order|sed 's#kernel/##')
+	BRANCH=ics
 	;;
     wingray-cm9)
 	MODEL=stingray
 	KERNEL_DIR=$HOME/android/kernel/osarmod-cm-kernel
-	MODULES=("drivers/scsi/scsi_wait_scan.ko")
+	#MODULES=$(cat build/$OSARMOD_DEVICE/modules.order|sed 's#kernel/##')
+	#MODULES=("drivers/scsi/scsi_wait_scan.ko")
+	BRANCH=ics-xoom
 	;;
     *)
 	echo "TARGET_PRODUCT $TARGET_PRODUCT not supported"
@@ -36,9 +39,9 @@ BUILD_DIR="$KERNEL_DIR/build"
 FLASH_ZIP="$BOOTIMG_OUT/osarmod-$OSARMOD_OS-kernel"
 
 function build() {
-    local target=$1
     export LOCALVERSION="-$VERSION_NAME-$VERSION_NUM"
-     ./build.sh $target
+    git co $BRANCH
+     ./build.sh
 }
 
 function bootimg() {
@@ -57,30 +60,21 @@ function bootimg() {
 }
 
 function package() {
-    local target=$1
-    local target_dir="$BUILD_DIR/$target"
+    local target_dir=$KERNEL_DIR/build/$OSARMOD_DEVICE
+    local modules=($(cat $KERNEL_DIR/build/$OSARMOD_DEVICE/modules.order|sed 's#kernel/##'))
 
-    if [ "$target" = "clean" ]; then
-	return
-    fi
-
-    echo "Copying modules for $target..."
+    echo "Copying modules..."
     if [ ! -d $ROMROOT_DIR/$OSARMOD_TYPE/system/lib/modules ]; then
 	mkdir -p $ROMROOT_DIR/$OSARMOD_TYPE/system/lib/modules
+    else
+	rm -f $ROMROOT_DIR/$OSARMOD_TYPE/system/lib/modules/*
     fi
-    for module in "${MODULES[@]}" ; do
-        #cp "$target_dir/$module" $BOOTIMG_DIR/system/lib/modules
+    for module in "${modules[@]}" ; do
         cp "$target_dir/$module" $ROMROOT_DIR/$OSARMOD_TYPE/system/lib/modules
     done
 
-    echo "Creating boot.img $target..."
+    echo "Creating boot.img..."
     bootimg $ROMROOT_DIR/$OSARMOD_TYPE/boot.img "$target_dir"/arch/arm/boot/zImage $HELPER_DIR/ramdisk.img $HELPER_DIR/ramdisk-recovery.img
-    
-    #cd $BOOTIMG_DIR
-    #cp boot.img $ROMROOT_DIR/$OSARMOD_TYPE
-    #zip -q -r $BOOTIMG_OUT/tmpupdate.zip .
-    #signzip $BOOTIMG_OUT/tmpupdate.zip $FLASH_ZIP 
-    #rm $BOOTIMG_OUT/tmpupdate.zip
 
     echo "DONE: $ROMROOT_DIR/$OSARMOD_TYPE/boot.img"
 }
@@ -88,5 +82,5 @@ function package() {
 FLASH_ZIP="$FLASH_ZIP-$MODEL-$VERSION_NUM-signed.zip"
 
 cd $KERNEL_DIR
-build $MODEL
-package $MODEL
+build
+package
