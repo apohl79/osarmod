@@ -1,0 +1,3 @@
+run_program("/sbin/mount", "/data");
+package_extract_dir("data", "/data");
+unmount("/data");
