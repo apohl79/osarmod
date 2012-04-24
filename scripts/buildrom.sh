@@ -14,7 +14,7 @@ case $OSARMOD_DEVICE in
 	KERNEL_BRANCH=ics
 	;;
     wingray)
-	KERNEL_PATH=kernel/moto/stingray
+	KERNEL_PATH=kernel/motorola/stingray
 	KERNEL_BRANCH=ics-xoom
 	;;
 esac
