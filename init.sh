@@ -68,6 +68,7 @@ else
     . build/envsetup.sh
     $init $target
     ./prebuilt/linux-x86/ccache/ccache -M 100G
+    export USE_CCACHE=1
     export OSARMOD_TYPE=${device}-${os}
     export OSARMOD_DEVICE=${device}
     export OSARMOD_DEVICE_COMMON=${device_common}
