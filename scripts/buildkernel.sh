@@ -39,7 +39,7 @@ BUILD_DIR="$KERNEL_DIR/build"
 FLASH_ZIP="$BOOTIMG_OUT/osarmod-$OSARMOD_OS-kernel"
 
 function build() {
-    export LOCALVERSION="-$VERSION_NAME-$VERSION_NUM"
+    export LOCALVERSION="-$VERSION_NUM"
     git co $BRANCH
      ./build.sh
 }
