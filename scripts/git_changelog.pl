@@ -2,7 +2,7 @@
 
 use strict;
 
-my $maxrows = 15;
+my $maxrows = 50;
 my $topdir = `pwd`;
 my $in = $ARGV[0];
 shift @ARGV;
