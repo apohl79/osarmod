@@ -4,6 +4,18 @@ use strict;
 
 my $maxrows = 50;
 my $topdir = `pwd`;
+my $branch = "";
+if ($ARGV[0] eq "-b") {
+  $branch = $ARGV[1];
+  shift @ARGV;
+  shift @ARGV;
+}
+my $path = "";
+if ($ARGV[0] eq "-d") {
+  $path = $ARGV[1];
+  shift @ARGV;
+  shift @ARGV;
+}
 my $in = $ARGV[0];
 shift @ARGV;
 my @devs = @ARGV;
@@ -12,7 +24,12 @@ if (defined $in) {
   $in_log = read_log($in);
 }
 
-git_dir();
+if (length $path) {
+  chdir($path);
+  git_log();
+} else {
+  git_dir();
+}
 
 sub git_dir {
   my $D;
@@ -44,13 +61,13 @@ sub is_git_dir {
 
 sub git_log {
   my $pwd = `pwd`;
-  my $log = `git log --oneline --no-color -n1`;
+  my $log = `git log --oneline --no-color -n1 $branch`;
   chomp $pwd;
   chomp $log;
   if (defined $in_log) {
     if ($log ne $in_log->{$pwd}) {
-      my $nlog = `git log --oneline --no-color`;
-      my $opwd = substr($pwd, length($topdir), length($pwd));
+      my $nlog = `git log --oneline --no-color $branch`;
+      my $opwd = length($path)? $path: substr($pwd, length($topdir), length($pwd));
       my $show = 1;
       if (scalar(@devs) > 0 && index($opwd, "device/") == 0) {
 	$show = 0;

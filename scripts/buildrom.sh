@@ -21,6 +21,7 @@ esac
 
 cd $KERNEL_PATH
 git co $KERNEL_BRANCH
+git_changelog.pl > /tmp/GIT_KLOG
 cd -
 
 #
@@ -183,6 +184,7 @@ else
 fi
 mv /tmp/CHANGELOG $TOP/build/$OSARMOD_TYPE/CHANGELOG_${OSARMOD_TYPE}_$VERSION_NUM
 mv /tmp/GIT_LOG $TOP/files/GIT_LOG_${OSARMOD_TYPE}_$VERSION_NUM
+mv /tmp/GIT_KLOG $TOP/files/GIT_KLOG_${OSARMOD_TYPE}_$VERSION_NUM
 
 echo "ROM finished: $TARGET"
 
