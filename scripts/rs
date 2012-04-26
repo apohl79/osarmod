@@ -3,25 +3,32 @@
 REPOS="device/samsung/aries-common device/samsung/galaxysmtd device/moto/wingray frameworks/base packages/apps/Settings packages/apps/Exchange"
 
 # update OMParts
+echo "updating OMParts..."
 cd packages/apps/OMParts
 git pull origin master;
-cd -
+cd - >/dev/null
+echo ""
 
 # stash patches
+echo "stashing local changes... (see /tmp/stash.log for details)"
 for r in $REPOS; do
-    echo $r
+    echo "* $r"
     cd $r
-    git stash
-    cd -
+    git stash >/tmp/stash.log
+    cd - >/dev/null
 done
+echo ""
 
 # sync
+echo "syncing android..."
 repo sync -j16
+echo ""
 
 # apply patches
+echo "restoring local changes... (see /tmp/stash.log for details)"
 for r in $REPOS; do
-    echo $r
+    echo "* $r"
     cd $r
-    git stash pop
-    cd -
+    git stash pop >/tmp/stash.log
+    cd - >/dev/null
 done
