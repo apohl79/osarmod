@@ -20,7 +20,7 @@ case $OSARMOD_DEVICE in
 esac
 
 cd $KERNEL_PATH
-git co $KERNEL_BRANCH
+#git co $KERNEL_BRANCH
 git_changelog.pl > /tmp/GIT_KLOG
 cd -
 
