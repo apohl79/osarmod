@@ -2,27 +2,19 @@
 
 export PATH=$PATH:$HOME/android/scripts
 
-echo "Target device selection:"
-echo ""
-#echo "  [1] Galaxy S - CM7"
-echo "  [1] Galaxy S - CM9"
-#echo "  [3] Galaxy S II - CM7"
-#echo "  [4] Xoom (US WiFi) - ICS/AOSP"
-echo "  [2] Xoom (US WiFi) - CM9"
-#echo "  [5] Xoom (US WiFi) - ICS/EOS"
-echo ""
-echo -n "Choose target [none]: "
-read N
+if [ -z $OSARMOD_INIT ]; then
+    echo "Target device selection:"
+    echo ""
+    echo "  [1] Galaxy S - CM9"
+    echo "  [2] Xoom (US WiFi) - CM9"
+    echo ""
+    echo -n "Choose target [none]: "
+    read N
+else
+    N=$OSARMOD_INIT
+fi
 
 case $N in 
-#    1)
-#	target=galaxysmtd
-#	init=breakfast
-#	system=android/system_gb
-#	device=galaxysmtd
-#	device_common=aries-common
-#	os=cm7
-#	;;
     1)
 	target=galaxysmtd
 	init=breakfast
@@ -31,22 +23,6 @@ case $N in
 	device_common=aries-common
 	os=cm9
 	;;
-#    3)
-#	target=galaxys2
-#	init=breakfast
-#	system=android/system_gb
-#	device=galaxys2
-#	device_common=c1-common
-#	os=cm7
-#	;;
-#    4)
-#	target=full_wingray-userdebug
-#	init=lunch
-#	system=android/system_aosp_ics
-#	device=wingray
-#	device_common=moto/common
-#	os=ics-aosp
-#	;;
     2)
 	target=wingray
 	init=breakfast
@@ -64,7 +40,7 @@ if [ "$target" = "none" ]; then
     cd android
     export TARGET_PRODUCT=none
 else
-    cd $system
+    cd $HOME/$system
     . build/envsetup.sh
     $init $target
     ./prebuilt/linux-x86/ccache/ccache -M 100G
@@ -86,3 +62,5 @@ alias goto_kernel="cd $HOME/android/kernel/osarmod-cm-kernel"
 alias edit_changelog="emacs $HOME/android/osarmod/CHANGELOG_${OSARMOD_TYPE}_NEW"
 alias edit_romversion="emacs $HOME/android/osarmod/VERSION_ROM_${OSARMOD_TYPE}"
 alias sc="show_changelog.sh | less"
+alias devbuild="DEVBUILD=1 buildall.sh"
+alias releasebuild="buildall.sh"
