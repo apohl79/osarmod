@@ -1,6 +1,6 @@
 #!/bin/bash
 
-REPOS="device/samsung/aries-common device/samsung/galaxysmtd device/moto/wingray frameworks/base packages/apps/Settings packages/apps/Exchange"
+REPOS="frameworks/base packages/apps/Settings packages/apps/Exchange packages/apps/Email device/samsung/galaxysmtd"
 
 # update OMParts
 echo "updating OMParts..."
