@@ -14,15 +14,17 @@ case $OSARMOD_DEVICE in
 	KERNEL_BRANCH=ics
 	;;
     wingray)
-	KERNEL_PATH=kernel/motorola/stingray
-	KERNEL_BRANCH=ics-xoom
+	KERNEL_PATH=
+	KERNEL_BRANCH=
 	;;
 esac
 
-cd $KERNEL_PATH
-#git co $KERNEL_BRANCH
-git_changelog.pl > /tmp/GIT_KLOG
-cd -
+if [ -n "$KERNEL_PATH" ]; then
+    cd $KERNEL_PATH
+    #git co $KERNEL_BRANCH
+    git_changelog.pl > /tmp/GIT_KLOG
+    cd -
+fi
 
 #
 # VERSION AND CHANGELOG
@@ -65,7 +67,7 @@ VERSION=osarmod-${OSARMOD_OS}-$VERSION_NUM
 #
 case $OSARMOD_OS in
     cm*)
-	OTAFILE="update-cm-*.zip"
+	OTAFILE="cm-*.zip"
 	CLEANCMD="mka clean"
 	BUILDCMD="mka bacon"
 	export CYANOGEN_RELEASE=1 
