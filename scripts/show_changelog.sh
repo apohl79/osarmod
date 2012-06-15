@@ -12,8 +12,8 @@ case $OSARMOD_DEVICE in
 	KERNEL_BRANCH=ics
 	;;
     wingray)
-	KERNEL_PATH=kernel/motorola/stingray
-	KERNEL_BRANCH=ics-xoom
+	KERNEL_PATH=
+	KERNEL_BRANCH=
 	;;
 esac
 
@@ -25,7 +25,9 @@ fi
 echo "" >> $CHANGELOG_TMP
 echo "Git Changes" >> $CHANGELOG_TMP
 echo "-----------" >> $CHANGELOG_TMP
-git_changelog.pl -b $KERNEL_BRANCH -d $KERNEL_PATH $GIT_KLOG >> $CHANGELOG_TMP
+if [ -n "$KERNEL_PATH" ]; then
+    git_changelog.pl -b $KERNEL_BRANCH -d $KERNEL_PATH $GIT_KLOG >> $CHANGELOG_TMP
+fi
 git_changelog.pl $GIT_LOG $OSARMOD_DEVICE $OSARMOD_DEVICE_COMMON >> $CHANGELOG_TMP
 
 cat $CHANGELOG_TMP
