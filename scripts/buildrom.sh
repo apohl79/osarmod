@@ -91,7 +91,7 @@ if [ "$1" != "-nocompile" ]; then
 	$CLEANCMD
     fi
     $BUILDCMD
-    OTAZIP=$(echo $OUT/$OTAFILE)
+    OTAZIP=$(ls -1 $OUT/$OTAFILE|tail -1)
 else
     if [ "$2" = "-ota" ]; then
 	OTAZIP=$3
@@ -100,7 +100,7 @@ else
 	    exit 1
 	fi
     else
-	OTAZIP=$(echo $OUT/$OTAFILE)
+	OTAZIP=$(ls -1 $OUT/$OTAFILE|tail -1)
     fi
 fi
 # END OF COMPILE
@@ -108,7 +108,7 @@ fi
 #
 # REPACKING OTA PACKAGE
 #
-if [ ! -e $OTAZIP ]; then
+if [ ! -e "$OTAZIP" ]; then
     sendemail -f root@dubidam.de -t $MAILTO -u "Build for $OSARMOD_TYPE FAILED" -m "$TARGET"
     echo $VERSION_NUM_OLD > $TOP/files/VERSION_ROM_$OSARMOD_TYPE
     exit 1
