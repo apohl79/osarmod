@@ -123,8 +123,10 @@ unzip -q $OTAZIP
 
 echo "Adding Google Apps..."
 if [ -d $GAPPS ]; then
+    find $GAPPS/system -type f
     cp -r $GAPPS/system $REPACK
 else
+    find $GAPPS_ALT/system -type f
     cp -r $GAPPS_ALT/system $REPACK
 fi
 
@@ -135,7 +137,9 @@ for f in $(cat $TOP/files/REMOVE_ROM_FILES_$OSARMOD_TYPE); do
 done
 
 echo "Adding additional files..."
+find $ROMROOT/common-$OSARMOD_OS/ -type f
 cp -r $ROMROOT/common-$OSARMOD_OS/* $REPACK
+find $ROMROOT/$MODEL-$OSARMOD_OS/ -type f
 cp -r $ROMROOT/$MODEL-$OSARMOD_OS/* $REPACK
 
 cat $ROMROOT/$MODEL-${OSARMOD_OS}.ext/updater-script >> $REPACK/META-INF/com/google/android/updater-script
@@ -145,7 +149,7 @@ case $OSARMOD_OS in
     cm7)
 	cat $REPACK/system/build.prop | sed -e "s/\(ro.modversion=.*\)/ro.modversion=$VERSION/" > $REPACK/system/build.prop.new
 	;;
-    cm9)
+    cm9|cm10)
 	cat $REPACK/system/build.prop | sed -e "s/\(ro.cm.version=.*\)/ro.cm.version=$VERSION/" > $REPACK/system/build.prop.new
 	;;
     *)
@@ -178,6 +182,10 @@ if [ "$DEVBUILD" != "1" ]; then
     cp $TOP/files/VERSION_ROM_$OSARMOD_TYPE $TOP/build/$OSARMOD_TYPE/VERSION
     rm -f $TOP/build/$OSARMOD_TYPE/latest
     ln -s $TARGET $TOP/build/$OSARMOD_TYPE/latest
+    # update dev files
+    echo $VERSION_NUM > $TOP/build/$OSARMOD_TYPE/VERSION_DEV
+    rm -f $TOP/build/$OSARMOD_TYPE/latest_dev
+    ln -s $TARGET $TOP/build/$OSARMOD_TYPE/latest_dev
 else
     # update build dir 
     echo $VERSION_NUM > $TOP/build/$OSARMOD_TYPE/VERSION_DEV
@@ -186,7 +194,7 @@ else
 fi
 mv /tmp/CHANGELOG $TOP/build/$OSARMOD_TYPE/CHANGELOG_${OSARMOD_TYPE}_$VERSION_NUM
 mv /tmp/GIT_LOG $TOP/files/GIT_LOG_${OSARMOD_TYPE}_$VERSION_NUM
-mv /tmp/GIT_KLOG $TOP/files/GIT_KLOG_${OSARMOD_TYPE}_$VERSION_NUM
+#mv /tmp/GIT_KLOG $TOP/files/GIT_KLOG_${OSARMOD_TYPE}_$VERSION_NUM
 
 echo "ROM finished: $TARGET"
 

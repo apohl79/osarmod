@@ -7,6 +7,8 @@ if [ -z $OSARMOD_INIT ]; then
     echo ""
     echo "  [1] Galaxy S - CM9"
     echo "  [2] Xoom (US WiFi) - CM9"
+    echo "  [3] Galaxy S - CM10"
+    echo "  [4] Xoom (US WiFi) - CM10"
     echo ""
     echo -n "Choose target [none]: "
     read N
@@ -31,6 +33,22 @@ case $N in
 	device_common=moto/common
 	os=cm9
 	;;
+    3)
+	target=galaxysmtd
+	init=breakfast
+	system=android/system_jellybean
+	device=galaxysmtd
+	device_common=aries-common
+	os=cm10
+	;;
+    4)
+	target=wingray
+	init=breakfast
+	system=android/system_jellybean
+	device=wingray
+	device_common=moto/common
+	os=cm10
+	;;
     *)
 	target=none
 	;;
@@ -43,7 +61,11 @@ else
     cd $HOME/$system
     . build/envsetup.sh
     $init $target
-    ./prebuilt/linux-x86/ccache/ccache -M 100G
+    if [ "$os" = "cm10" ]; then
+	./prebuilts/misc/linux-x86/ccache/ccache -M 100G
+    else
+	./prebuilt/linux-x86/ccache/ccache -M 100G
+    fi
     export USE_CCACHE=1
     export OSARMOD_TYPE=${device}-${os}
     export OSARMOD_DEVICE=${device}
@@ -60,7 +82,7 @@ alias goto_osarmod="cd $HOME/android/osarmod"
 alias goto_build="cd $HOME/android/build"
 alias goto_kernel="cd $HOME/android/kernel/osarmod-cm-kernel"
 alias edit_changelog="emacs $HOME/android/osarmod/CHANGELOG_${OSARMOD_TYPE}_NEW"
-alias edit_romversion="emacs $HOME/android/osarmod/VERSION_ROM_${OSARMOD_TYPE}"
+alias edit_romversion="emacs $HOME/android/osarmod/files/VERSION_ROM_${OSARMOD_TYPE}"
 alias sc="show_changelog.sh | less"
 alias devbuild="DEVBUILD=1 buildall.sh"
 alias releasebuild="buildall.sh"

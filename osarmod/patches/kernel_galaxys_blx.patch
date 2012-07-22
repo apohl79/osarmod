@@ -1,0 +1,229 @@
+From e281e31908be55eb4f960241324fd18795b7c816 Mon Sep 17 00:00:00 2001
+From: Andreas Pohl <apohl79@gmail.com>
+Date: Wed, 28 Mar 2012 19:52:12 +0000
+Subject: [PATCH] Added BLX
+
+---
+ drivers/misc/Kconfig             |    6 ++
+ drivers/misc/Makefile            |    1 +
+ drivers/misc/blx.c               |  105 ++++++++++++++++++++++++++++++++++++++
+ drivers/power/max17040_battery.c |    8 +++
+ drivers/power/s5pc110_battery.c  |   13 +++++
+ include/linux/blx.h              |   11 ++++
+ 6 files changed, 144 insertions(+), 0 deletions(-)
+ create mode 100644 drivers/misc/blx.c
+ create mode 100644 include/linux/blx.h
+
+diff --git a/drivers/misc/Kconfig b/drivers/misc/Kconfig
+index 868c1ac..1d15460 100755
+--- a/drivers/misc/Kconfig
++++ b/drivers/misc/Kconfig
+@@ -609,4 +609,10 @@ config SAMSUNG_PARAM
+ 	help
+ 	  Driver for communication with Samsung's secondary bootloader
+ 
++config BLX
++       bool "Support for Battery Life eXtender"
++       default y
++       help
++         Say Y here to enable Battery Life eXtender
++
+ endif # MISC_DEVICES
+diff --git a/drivers/misc/Makefile b/drivers/misc/Makefile
+index dd26213..fafe410 100755
+--- a/drivers/misc/Makefile
++++ b/drivers/misc/Makefile
+@@ -58,3 +58,4 @@ obj-$(CONFIG_SAMSUNG_JACK)	+= sec_jack.o
+ obj-$(CONFIG_USB_SWITCH_FSA9480)	+= fsa9480.o
+ obj-$(CONFIG_SAMSUNG_MODEMCTL) += samsung_modemctl/
+ obj-$(CONFIG_SAMSUNG_PARAM)	+= param/
++obj-$(CONFIG_BLX)              += blx.o
+diff --git a/drivers/misc/blx.c b/drivers/misc/blx.c
+new file mode 100644
+index 0000000..e5cd508
+--- /dev/null
++++ b/drivers/misc/blx.c
+@@ -0,0 +1,105 @@
++/* drivers/misc/blx.c
++ *
++ * Copyright 2011  Ezekeel
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 as
++ * published by the Free Software Foundation.
++ */
++
++#include <linux/init.h>
++#include <linux/device.h>
++#include <linux/miscdevice.h>
++#include <linux/blx.h>
++
++#define BATTERYLIFEEXTENDER_VERSION 1
++
++static int charging_limit = MAX_CHARGINGLIMIT;
++
++static ssize_t blx_charginglimit_read(struct device * dev, struct device_attribute * attr, char * buf)
++{
++    return sprintf(buf, "%u\n", charging_limit);
++}
++
++static ssize_t blx_charginglimit_write(struct device * dev, struct device_attribute * attr, const char * buf, size_t size)
++{
++    unsigned int data;
++
++    if(sscanf(buf, "%u\n", &data) == 1) 
++	{
++	    if (data >= 0 && data <= MAX_CHARGINGLIMIT)
++		{
++		    charging_limit = data;
++		    
++		    pr_info("BLX charging limit set to %u\n", charging_limit);
++		}
++	    else
++		{
++		    pr_info("%s: invalid input range %u\n", __FUNCTION__, data);
++		}
++	} 
++    else 
++	{
++	    pr_info("%s: invalid input\n", __FUNCTION__);
++	}
++
++    return size;
++}
++
++static ssize_t blx_version(struct device * dev, struct device_attribute * attr, char * buf)
++{
++    return sprintf(buf, "%u\n", BATTERYLIFEEXTENDER_VERSION);
++}
++
++static DEVICE_ATTR(charging_limit, S_IRUGO | S_IWUGO, blx_charginglimit_read, blx_charginglimit_write);
++static DEVICE_ATTR(version, S_IRUGO , blx_version, NULL);
++
++static struct attribute *blx_attributes[] = 
++    {
++	&dev_attr_charging_limit.attr,
++	&dev_attr_version.attr,
++	NULL
++    };
++
++static struct attribute_group blx_group = 
++    {
++	.attrs  = blx_attributes,
++    };
++
++static struct miscdevice blx_device = 
++    {
++	.minor = MISC_DYNAMIC_MINOR,
++	.name = "batterylifeextender",
++    };
++
++int get_charginglimit(void)
++{
++    return charging_limit;
++}
++EXPORT_SYMBOL(get_charginglimit);
++
++static int __init blx_init(void)
++{
++    int ret;
++
++    pr_info("%s misc_register(%s)\n", __FUNCTION__, blx_device.name);
++
++    ret = misc_register(&blx_device);
++
++    if (ret) 
++	{
++	    pr_err("%s misc_register(%s) fail\n", __FUNCTION__, blx_device.name);
++
++	    return 1;
++	}
++
++    if (sysfs_create_group(&blx_device.this_device->kobj, &blx_group) < 0) 
++	{
++	    pr_err("%s sysfs_create_group fail\n", __FUNCTION__);
++	    pr_err("Failed to create sysfs group for device (%s)!\n", blx_device.name);
++	}
++
++    return 0;
++}
++
++device_initcall(blx_init);
+diff --git a/drivers/power/max17040_battery.c b/drivers/power/max17040_battery.c
+index aedb539..9d5a87a 100755
+--- a/drivers/power/max17040_battery.c
++++ b/drivers/power/max17040_battery.c
+@@ -22,6 +22,10 @@
+ #include <linux/slab.h>
+ #include <linux/time.h>
+ 
++#ifdef CONFIG_BLX
++#include <linux/blx.h>
++#endif
++
+ #define MAX17040_VCELL_MSB	0x02
+ #define MAX17040_VCELL_LSB	0x03
+ #define MAX17040_SOC_MSB	0x04
+@@ -204,7 +208,11 @@ static void max17040_get_status(struct i2c_client *client)
+ 		chip->status = POWER_SUPPLY_STATUS_DISCHARGING;
+ 	}
+ 
++#ifdef CONFIG_BLX
++	if (chip->soc >= get_charginglimit())
++#else
+ 	if (chip->soc > MAX17040_BATTERY_FULL)
++#endif
+ 		chip->status = POWER_SUPPLY_STATUS_FULL;
+ }
+ 
+diff --git a/drivers/power/s5pc110_battery.c b/drivers/power/s5pc110_battery.c
+index cd8779b..5bbd24b 100755
+--- a/drivers/power/s5pc110_battery.c
++++ b/drivers/power/s5pc110_battery.c
+@@ -55,6 +55,10 @@
+ #include "s5pc110_battery.h"
+ #include <linux/mfd/max8998.h>
+ 
++#ifdef CONFIG_BLX
++#include <linux/blx.h>
++#endif
++
+ #define POLLING_INTERVAL	1000
+ #define ADC_TOTAL_COUNT		10
+ #define ADC_DATA_ARR_SIZE	6
+@@ -471,6 +475,15 @@ static void s3c_bat_discharge_reason(struct chg_data *chg)
+ 	if (chg->set_batt_full)
+ 		chg->bat_info.dis_reason |= DISCONNECT_BAT_FULL;
+ 
++#ifdef CONFIG_BLX
++	if (get_charginglimit() != MAX_CHARGINGLIMIT && chg->bat_info.batt_soc >= get_charginglimit())
++	    {
++		chg->bat_info.dis_reason |= DISCONNECT_BAT_FULL;
++
++		chg->bat_info.batt_is_full = true;
++	    }
++#endif
++
+ 	if (chg->bat_info.batt_health != POWER_SUPPLY_HEALTH_GOOD)
+ 		chg->bat_info.dis_reason |= chg->bat_info.batt_health ==
+ 			POWER_SUPPLY_HEALTH_OVERHEAT ?
+diff --git a/include/linux/blx.h b/include/linux/blx.h
+new file mode 100644
+index 0000000..e3bd8e1
+--- /dev/null
++++ b/include/linux/blx.h
+@@ -0,0 +1,11 @@
++/* include/linux/blx.h */
++
++#ifndef _LINUX_BLX_H
++#define _LINUX_BLX_H
++
++// for kernels including the 100% charging 'fix' change this to 100:
++#define MAX_CHARGINGLIMIT 96
++
++int get_charginglimit(void);
++
++#endif
+-- 
+1.7.2.5
+

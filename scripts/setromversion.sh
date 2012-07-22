@@ -13,3 +13,4 @@ else
     VER_NEW="$BASE_NEW.1"
 fi
 echo $VER_NEW > $VER_FILE
+echo "ROM Version: $VER_NEW"

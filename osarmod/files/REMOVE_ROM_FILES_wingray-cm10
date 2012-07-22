@@ -1,0 +1,14 @@
+recovery
+system/app/RomManager.apk
+system/app/Term.apk
+system/lib/libjackpal-androidterm4.so
+system/app/CMWallpapers.apk
+system/app/HoloSpiralWallpaper.apk
+system/app/LiveWallpapers.apk
+system/app/MagicSmokeWallpapers.apk
+system/app/MotoLocationProxy.apk.old
+system/app/StingrayProgramMenu.apk.old
+system/app/StingrayProgramMenuSystem.apk.old
+system/app/Torch.apk
+system/media/video/*
+system/media/audio/ringtones/*
