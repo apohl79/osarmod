@@ -179,16 +179,16 @@ if [ "$DEVBUILD" != "1" ]; then
     touch $TOP/CHANGELOG_${OSARMOD_TYPE}_NEW
 
     # update build dir 
-    cp $TOP/files/VERSION_ROM_$OSARMOD_TYPE $TOP/build/$OSARMOD_TYPE/VERSION
+    cp $TOP/files/VERSION_ROM_$OSARMOD_TYPE $TOP/build/$OSARMOD_TYPE/version
     rm -f $TOP/build/$OSARMOD_TYPE/latest
     ln -s $TARGET $TOP/build/$OSARMOD_TYPE/latest
     # update dev files
-    echo $VERSION_NUM > $TOP/build/$OSARMOD_TYPE/VERSION_DEV
+    echo $VERSION_NUM > $TOP/build/$OSARMOD_TYPE/version_dev
     rm -f $TOP/build/$OSARMOD_TYPE/latest_dev
     ln -s $TARGET $TOP/build/$OSARMOD_TYPE/latest_dev
 else
     # update build dir 
-    echo $VERSION_NUM > $TOP/build/$OSARMOD_TYPE/VERSION_DEV
+    echo $VERSION_NUM > $TOP/build/$OSARMOD_TYPE/version_dev
     rm -f $TOP/build/$OSARMOD_TYPE/latest_dev
     ln -s $TARGET $TOP/build/$OSARMOD_TYPE/latest_dev
 fi
