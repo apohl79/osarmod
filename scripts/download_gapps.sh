@@ -3,13 +3,14 @@ DIR=$HOME/android/osarmod
 URL=$1
 FILE=$(basename $URL)
 
+cd $DIR
+
 if [ -e $DIR/$FILE ]; then
-    echo "$DIR/$FILE exists. Terminating."
-    exit
+    echo "$DIR/$FILE exists. Skipping download."
+else
+    wget $URL
 fi
 
-cd $DIR
-wget $URL
 
 echo "Unpacking to $DIR/gapps_${OSARMOD_TYPE}..."
 rm -rf $DIR/gapps_$OSARMOD_TYPE
