@@ -1,2 +1,8 @@
 system/app/RomManager.apk
 system/app/Term.apk
+system/lib/libjackpal-androidterm4.so
+system/app/CMWallpapers.apk
+system/app/HoloSpiralWallpaper.apk
+system/app/MagicSmokeWallpapers.apk
+system/app/Torch.apk
+system/media/video/*
