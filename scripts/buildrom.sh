@@ -5,26 +5,28 @@ TOP=$HOME/android/osarmod
 ROMROOT=$TOP/romroot
 MODEL=$OSARMOD_DEVICE
 
+echo -ne "\033]0;[Building] $OSARMOD_TYPE ...\007"
+
 #
 # PREPARING THE KERNEL
 #
-case $OSARMOD_DEVICE in
-    galaxysmtd)
-	KERNEL_PATH=kernel/samsung/aries
-	KERNEL_BRANCH=ics
-	;;
-    wingray)
-	KERNEL_PATH=
-	KERNEL_BRANCH=
-	;;
-esac
-
-if [ -n "$KERNEL_PATH" ]; then
-    cd $KERNEL_PATH
-    #git co $KERNEL_BRANCH
-    git_changelog.pl > /tmp/GIT_KLOG
-    cd -
-fi
+#case $OSARMOD_DEVICE in
+#    galaxysmtd)
+#	KERNEL_PATH=kernel/samsung/aries
+#	KERNEL_BRANCH=ics
+#	;;
+#    wingray)
+#	KERNEL_PATH=
+#	KERNEL_BRANCH=
+#	;;
+#esac
+#
+#if [ -n "$KERNEL_PATH" ]; then
+#    cd $KERNEL_PATH
+#    #git co $KERNEL_BRANCH
+#    git_changelog.pl > /tmp/GIT_KLOG
+#    cd -
+#fi
 
 #
 # VERSION AND CHANGELOG
@@ -47,6 +49,7 @@ if [ "$1" != "-nocompile" ]; then
 fi
 
 VERSION_NUM=$(cat $TOP/files/VERSION_ROM_$OSARMOD_TYPE)
+
 GAPPS=$TOP/gapps_$OSARMOD_TYPE
 GAPPS_ALT=$TOP/gapps_$OSARMOD_OS
 if [ "$DEVBUILD" = "1" ]; then
@@ -61,6 +64,9 @@ else
     TARGET=$TOP/build/$OSARMOD_TYPE/osarmod-${OSARMOD_OS}-rom-$MODEL-$VERSION_NUM-signed.zip
 fi
 VERSION=osarmod-${OSARMOD_OS}-$VERSION_NUM
+
+# Set the window title
+echo -ne "\033]0;[Building] $OSARMOD_TYPE (ROM Version $VERSION_NUM) ...\007"
 
 #
 # COMPILE
@@ -123,10 +129,10 @@ unzip -q $OTAZIP
 
 echo "Adding Google Apps..."
 if [ -d $GAPPS ]; then
-    find $GAPPS/system -type f
+    find $GAPPS/system -type f | perl -ne "s|$GAPPS/||; print '  [+] '.\$_"
     cp -r $GAPPS/system $REPACK
 else
-    find $GAPPS_ALT/system -type f
+    find $GAPPS_ALT/system -type f | perl -ne "s|$GAPPS_ALT/||; print '  [+] '.\$_"
     cp -r $GAPPS_ALT/system $REPACK
 fi
 
@@ -137,9 +143,9 @@ for f in $(cat $TOP/files/REMOVE_ROM_FILES_$OSARMOD_TYPE); do
 done
 
 echo "Adding additional files..."
-find $ROMROOT/common-$OSARMOD_OS/ -type f
+find $ROMROOT/common-$OSARMOD_OS/ -type f | perl -ne "s|$ROMROOT/common-$OSARMOD_OS/||; print '  [+] '.\$_"
 cp -r $ROMROOT/common-$OSARMOD_OS/* $REPACK
-find $ROMROOT/$MODEL-$OSARMOD_OS/ -type f
+find $ROMROOT/$MODEL-$OSARMOD_OS/ -type f | perl -ne "s|$ROMROOT/$MODEL-$OSARMOD_OS/||; print '  [+] '.\$_"
 cp -r $ROMROOT/$MODEL-$OSARMOD_OS/* $REPACK
 
 cat $ROMROOT/$MODEL-${OSARMOD_OS}.ext/updater-script >> $REPACK/META-INF/com/google/android/updater-script
@@ -147,10 +153,10 @@ cat $ROMROOT/$MODEL-${OSARMOD_OS}.ext/updater-script >> $REPACK/META-INF/com/goo
 echo "Setting ROM version to: $VERSION"
 case $OSARMOD_OS in
     cm7)
-	cat $REPACK/system/build.prop | sed -e "s/\(ro.modversion=.*\)/ro.modversion=$VERSION/" > $REPACK/system/build.prop.new
+	cat $REPACK/system/build.prop | grep -vi "ro.osarmod" | sed -e "s/\(ro.modversion=.*\)/ro.modversion=$VERSION/" > $REPACK/system/build.prop.new
 	;;
     cm9|cm10)
-	cat $REPACK/system/build.prop | sed -e "s/\(ro.cm.version=.*\)/ro.cm.version=$VERSION/" > $REPACK/system/build.prop.new
+	cat $REPACK/system/build.prop | grep -vi "ro.osarmod" | sed -e "s/\(ro.cm.version=.*\)/ro.cm.version=$VERSION/" > $REPACK/system/build.prop.new
 	;;
     *)
 	BUILD_ID=$(cat $REPACK/system/build.prop | grep build.id | sed 's/ro.build.id=//')
@@ -162,6 +168,9 @@ echo "# OSARMOD" >> $REPACK/system/build.prop.new
 echo "ro.osarmod.version=$VERSION_NUM" >> $REPACK/system/build.prop.new
 echo "ro.osarmod.ostype=$OSARMOD_OS" >> $REPACK/system/build.prop.new
 echo "ro.osarmod.device=$OSARMOD_DEVICE" >> $REPACK/system/build.prop.new
+if [ -r $ROMROOT/$MODEL-${OSARMOD_OS}.ext/build.prop ]; then
+    cat $ROMROOT/$MODEL-${OSARMOD_OS}.ext/build.prop >> $REPACK/system/build.prop.new
+fi
 mv $REPACK/system/build.prop.new $REPACK/system/build.prop
 
 echo "Repacking..."
@@ -192,8 +201,12 @@ else
     rm -f $TOP/build/$OSARMOD_TYPE/latest_dev
     ln -s $TARGET $TOP/build/$OSARMOD_TYPE/latest_dev
 fi
-mv /tmp/CHANGELOG $TOP/build/$OSARMOD_TYPE/CHANGELOG_${OSARMOD_TYPE}_$VERSION_NUM
-mv /tmp/GIT_LOG $TOP/files/GIT_LOG_${OSARMOD_TYPE}_$VERSION_NUM
+if [ -e /tmp/CHANGELOG ]; then
+    mv /tmp/CHANGELOG $TOP/build/$OSARMOD_TYPE/CHANGELOG_${OSARMOD_TYPE}_$VERSION_NUM
+fi
+if [ -e /tmp/GIT_LOG ]; then
+    mv /tmp/GIT_LOG $TOP/logs/GIT_LOG_${OSARMOD_TYPE}_$VERSION_NUM
+fi
 #mv /tmp/GIT_KLOG $TOP/files/GIT_KLOG_${OSARMOD_TYPE}_$VERSION_NUM
 
 echo "ROM finished: $TARGET"
