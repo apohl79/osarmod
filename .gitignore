@@ -16,6 +16,7 @@ kernel/xoom-debian/
 system_gb/
 system_aosp_ics/
 system_ics/
+system_jellybean/
 toolchain/
 VERSION_*
 xoom/
