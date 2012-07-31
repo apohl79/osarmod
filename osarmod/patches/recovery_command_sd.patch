@@ -1,0 +1,71 @@
+From 0bace85d5eb92a2fa2c9958b38445c58fb26f623 Mon Sep 17 00:00:00 2001
+From: Andreas Pohl <apohl79@gmail.com>
+Date: Mon, 30 Jul 2012 14:22:21 +0200
+Subject: [PATCH] Added command file support on /sdcard/recovery
+
+Change-Id: I9f9629c11bf66e2225ab9c45fe19becf584ea2f8
+---
+ recovery.c |   26 +++++++++++++++++++++++++-
+ 1 files changed, 25 insertions(+), 1 deletions(-)
+
+diff --git a/recovery.c b/recovery.c
+index d22e879..1461786 100644
+--- a/recovery.c
++++ b/recovery.c
+@@ -57,6 +57,7 @@ static const struct option OPTIONS[] = {
+ };
+ 
+ static const char *COMMAND_FILE = "/cache/recovery/command";
++static const char *COMMAND_FILE_SD = "/sdcard/recovery/command";
+ static const char *INTENT_FILE = "/cache/recovery/intent";
+ static const char *LOG_FILE = "/cache/recovery/log";
+ static const char *LAST_LOG_FILE = "/cache/recovery/last_log";
+@@ -144,7 +145,7 @@ fopen_path(const char *path, const char *mode) {
+     if (strchr("wa", mode[0])) dirCreateHierarchy(path, 0777, NULL, 1, sehandle);
+ 
+     FILE *fp = fopen(path, mode);
+-    if (fp == NULL && path != COMMAND_FILE) LOGE("Can't open %s\n", path);
++    if (fp == NULL && path != COMMAND_FILE && path != COMMAND_FILE_SD) LOGE("Can't open %s\n", path);
+     return fp;
+ }
+ 
+@@ -214,6 +215,25 @@ get_args(int *argc, char ***argv) {
+         }
+     }
+ 
++    // --- if that doesn't work, try the command file from the sdcard
++    if (*argc <= 1) {
++        FILE *fp = fopen_path(COMMAND_FILE_SD, "r");
++        if (fp != NULL) {
++            char *argv0 = (*argv)[0];
++            *argv = (char **) malloc(sizeof(char *) * MAX_ARGS);
++            (*argv)[0] = argv0;  // use the same program name
++
++            char buf[MAX_ARG_LENGTH];
++            for (*argc = 1; *argc < MAX_ARGS; ++*argc) {
++                if (!fgets(buf, sizeof(buf), fp)) break;
++                (*argv)[*argc] = strdup(strtok(buf, "\r\n"));  // Strip newline.
++            }
++
++            check_and_fclose(fp, COMMAND_FILE_SD);
++            LOGI("Got arguments from %s\n", COMMAND_FILE_SD);
++        }
++    }
++
+     // --> write the arguments we have back into the bootloader control block
+     // always boot into recovery after this (until finish_recovery() is called)
+     strlcpy(boot.command, "boot-recovery", sizeof(boot.command));
+@@ -295,6 +315,10 @@ finish_recovery(const char *send_intent) {
+         (unlink(COMMAND_FILE) && errno != ENOENT)) {
+         LOGW("Can't unlink %s\n", COMMAND_FILE);
+     }
++    if (ensure_path_mounted(COMMAND_FILE_SD) != 0 ||
++        (unlink(COMMAND_FILE_SD) && errno != ENOENT)) {
++        LOGW("Can't unlink %s\n", COMMAND_FILE_SD);
++    }
+ 
+     sync();  // For good measure.
+ }
+-- 
+1.7.2.5
+
