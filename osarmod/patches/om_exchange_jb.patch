@@ -1,0 +1,69 @@
+From 3dfb37dc7b5849ac401860096d6394dddb633d5e Mon Sep 17 00:00:00 2001
+From: Andreas Pohl <apohl79@gmail.com>
+Date: Tue, 31 Jul 2012 20:54:54 +0200
+Subject: [PATCH] Ignore password policy
+
+Change-Id: Ide8337b69bb7a20275d767e89ee01e03d4878bfb
+---
+ .../android/exchange/adapter/ProvisionParser.java  |   26 ++++++++++----------
+ 1 files changed, 13 insertions(+), 13 deletions(-)
+
+diff --git a/exchange2/src/com/android/exchange/adapter/ProvisionParser.java b/exchange2/src/com/android/exchange/adapter/ProvisionParser.java
+index 0825f74..8a762a6 100644
+--- a/exchange2/src/com/android/exchange/adapter/ProvisionParser.java
++++ b/exchange2/src/com/android/exchange/adapter/ProvisionParser.java
+@@ -118,20 +118,20 @@ public class ProvisionParser extends Parser {
+             int res = 0;
+             switch (tag) {
+                 case Tags.PROVISION_DEVICE_PASSWORD_ENABLED:
+-                    if (getValueInt() == 1) {
+-                        passwordEnabled = true;
+-                        if (policy.mPasswordMode == Policy.PASSWORD_MODE_NONE) {
+-                            policy.mPasswordMode = Policy.PASSWORD_MODE_SIMPLE;
+-                        }
+-                    }
++                    //if (getValueInt() == 1) {
++                    //    passwordEnabled = true;
++                    //    if (policy.mPasswordMode == Policy.PASSWORD_MODE_NONE) {
++                    //        policy.mPasswordMode = Policy.PASSWORD_MODE_SIMPLE;
++                    //    }
++                    //}
+                     break;
+                 case Tags.PROVISION_MIN_DEVICE_PASSWORD_LENGTH:
+-                    policy.mPasswordMinLength = getValueInt();
++                    //policy.mPasswordMinLength = getValueInt();
+                     break;
+                 case Tags.PROVISION_ALPHA_DEVICE_PASSWORD_ENABLED:
+-                    if (getValueInt() == 1) {
+-                        policy.mPasswordMode = Policy.PASSWORD_MODE_STRONG;
+-                    }
++                    //if (getValueInt() == 1) {
++                    //    policy.mPasswordMode = Policy.PASSWORD_MODE_STRONG;
++                    //}
+                     break;
+                 case Tags.PROVISION_MAX_INACTIVITY_TIME_DEVICE_LOCK:
+                     // EAS gives us seconds, which is, happily, what the PolicySet requires
+@@ -147,7 +147,7 @@ public class ProvisionParser extends Parser {
+                     policy.mPasswordHistory = getValueInt();
+                     break;
+                 case Tags.PROVISION_ALLOW_CAMERA:
+-                    policy.mDontAllowCamera = (getValueInt() == 0);
++                    policy.mDontAllowCamera = false;
+                     break;
+                 case Tags.PROVISION_ALLOW_SIMPLE_DEVICE_PASSWORD:
+                     // Ignore this unless there's any MSFT documentation for what this means
+@@ -358,9 +358,9 @@ public class ProvisionParser extends Parser {
+         }
+ 
+         // Make sure policy settings are valid; password not enabled trumps other password settings
+-        if (!passwordEnabled) {
++        //if (!passwordEnabled) {
+             policy.mPasswordMode = Policy.PASSWORD_MODE_NONE;
+-        }
++		//}
+ 
+         if (!unsupportedList.isEmpty()) {
+             StringBuilder sb = new StringBuilder();
+-- 
+1.7.2.5
+

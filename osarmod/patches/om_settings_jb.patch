@@ -1,0 +1,165 @@
+From d34c8eca97f63c0990c1fe32e4592d3306b10f3e Mon Sep 17 00:00:00 2001
+From: Andreas Pohl <apohl79@gmail.com>
+Date: Tue, 31 Jul 2012 20:44:23 +0200
+Subject: [PATCH] Added OSARMOD settings to JB
+
+Change-Id: I920db185079912eca6aca056f94f899df506017e
+---
+ res/drawable-hdpi/ic_osarmod.png  |  Bin 0 -> 1421 bytes
+ res/drawable-mdpi/ic_osarmod.png  |  Bin 0 -> 916 bytes
+ res/drawable-xhdpi/ic_osarmod.png |  Bin 0 -> 1926 bytes
+ res/values/strings.xml            |    3 +++
+ res/xml/settings_headers.xml      |   11 +++++++++++
+ 5 files changed, 14 insertions(+), 0 deletions(-)
+ create mode 100644 res/drawable-hdpi/ic_osarmod.png
+ create mode 100644 res/drawable-mdpi/ic_osarmod.png
+ create mode 100644 res/drawable-xhdpi/ic_osarmod.png
+
+diff --git a/res/drawable-hdpi/ic_osarmod.png b/res/drawable-hdpi/ic_osarmod.png
+new file mode 100644
+index 0000000000000000000000000000000000000000..336f1b738ec57d0abeeb5bbba6de57932609629d
+GIT binary patch
+literal 1421
+zcmV;81#<d{P)<h;3K|Lk000e1NJLTq001xm001xu1^@s6R|5Hm00009a7bBm000XU
+z000XU0RWnu7ytkOAY({UO#lFTB>(_`g8%^e{{R4h=>PzAFaQARU;qF*m;eA5Z<1fd
+zMgRZ>6G=otRCwC#nQMsEMHt3^XLr3U>T2bM)F4Vq(^X2-Qc(--Muj3}Ub;v|R@j&5
+z!{&zwg6LCUDu^I3!A)!JCL&6qq<PIty572~c`0pmO-*z4>C1EAWjcE~drp$HFAV>g
+zcjmk^&&)eB&pRh0iOX3^xXh&uKpTKI0GGLx71>@7U?6ZS(BEZ%I$$rb3D^!C{x1P&
+z2RsN&1?~W@Y^HrZum-3G76WGr>RnPH>0wEm)wnb`H72_xJz2;YGOfIcy8&+k(-Zx7
+zz?Z-};9KAnPzrRgYu)Bm8kqcU3Gg&<=u)h}O_H`IGx>$2`$C(Jk}4&2a=DkJOsF3#
+z>C?o<50Y-rcRcwHzQ3eHq0>4^kGU=*X||*qNsA=CBk4NVeIx0Jq~(%kNh-B|qND@C
+zUVXkG@)>-Er0t=zJ(32vZkD7Kl3tTEILB|dCA0l~@cllLHio(bl6wCe02YK!_PUdH
+zl0J|$FLYWaX^f;QN&T$b(#R&Rk<{6fvmtTGvSI?59E>0L%(s)YR?^(yLa#{L7ut?X
+z0KAn<gk0A}($$jo2mN!!0?<Bjof+0wdzSHrT`%d4WP^`R08DauhW$M&ORS$D>7sSN
+zcx4I(Fe!Aj(z=;;8zc>~PfvDvaT5S$1iPapod|88wSH01JyQ$-p9F(<`G{O4si$XX
+zwWPa4`_Eel07(ypw!cd1>O&yA3STG3?>|y=WbP_ptn)ttD}cvM1%3lM1N(s^z!j~y
+z5I;1f0O$!k<qL3wb;E#b3t^*!ee2@E3z+D9iEqwZfUUrIw<`_5&$Ix<tH62ZAMtlt
+z;8~*z0Wd7&*LpxV1B=Wyv*hd#;GD}Rt*Zwb5_^B<=wqi@Dz;extPJ%-3SpxILVg=?
+zjVW>oaKZYKwsS7bVteOP0F&)1sZ{ve38(~WZLb5+yAS}~{k;hM4)hJH_Nd8QgI%lC
+zb=h*(?T!X}Q=OWUUch?O><&PeLI7laSWeNW=eEGV#{sMI+}N2g0R;y%bzx)n0CxGL
+z$ac^^0hs}w2X3_PLSnBP_$o&~vwdIy90R%n9bG<M2!K5yUkPmS(N|)(s?YJ82?0PV
+zHBPBa@%OAl&i+8Tb%zT%g*N3lkrw*gKMV}db5hE4=&lDwgn+0n+&ut03IVXqQ5E5w
+zud(Ztw{RacCocwf`N-dUf(x!GG$LD;P=k&M<D8bX&xcAx@^-@Xq+f`mH;3S-Ra63C
+ze#lqZPhSqYw}H{EnE64#yl@D-ZhBG`Zu12>4uZT_pxkUTD-T%zanPNRG{yRw7OcRX
+zNocy-`Vo@OTX$4a_hJP!Gec(wCG~Z{o<>^pCGBVe!1Nq$`IDo$3Q4s=UscSAtVGh%
+zV0@E1>>}y2Cf<D-1CX_~%7ZU+z@L?kUioIn*3!4pi@;1^pUXo{6FT`-ZVqrTkGI%k
+zW}#zE{+9aw05}dzYlQd}{4O*i2?c+abg%0=OM1b<`N<?E-YMyH2r08c%BUn<{VRE2
+zD*C$+l16&qQK}^kO`c#zN$TeEkYqzvN_tn)g<#{Dr28+`(_&xXy|C<ASqCgPpRe_i
+zTk62%2D{97U`%p}t_Pj~c3;ZJ-BL+&a;!#H&idu9PSTl1+8mMeQcE{%F;^gc=$&Ss
+zKRg68jY)$;(1pPJzPws3#Q+ecpNZLEpihXjPC0(Ab!fV~SRED{K-+(0Z2;N;v;p{^
+b0r-0Wmlc@C+sTB<00000NkvXXu0mjfNy3Y}
+
+literal 0
+HcmV?d00001
+
+diff --git a/res/drawable-mdpi/ic_osarmod.png b/res/drawable-mdpi/ic_osarmod.png
+new file mode 100644
+index 0000000000000000000000000000000000000000..bde98edf8b44bd61c0e772a72f3717a61a5e353d
+GIT binary patch
+literal 916
+zcmV;F18e+=P)<h;3K|Lk000e1NJLTq001BW001Be1^@s6b9#F800009a7bBm000XU
+z000XU0RWnu7ytkOAY({UO#lFTB>(_`g8%^e{{R4h=>PzAFaQARU;qF*m;eA5Z<1fd
+zMgRZ<8c9S!RCwC#mtBZeRTRg6qoR%zrQ=r<Q<?`Ut#GiAB25soULvyS14<No$p@oS
+zD1shrvfhempdOm$sh}PtC<>%rdeJ^^Mm-G5T!SP(C?h0iMs4QT%m2b@y5hZ~F$A+=
+zbN1SM?X~`A?Y;i%oEDYIY}1(JHU;2+2Vgm{8~7R+2239T4g#+MH#KEZZKN+$`}}7c
+zRQIa~)WhS}-d8&tvE7LCJJn+`d{o`8Uau}yuZqq*b&<MNtw#5Eb>pQ1xI-O@!5+1}
+zr>DnCrDA`7zv^;zwR&3pLfxdcs(Z3$RJ~`S02ZhxW9VtMb8v7_b%Q!f?NW;XD7XFU
+z)#{eWr`78w0-!$zdeud7-lpEKewDRd>J1q`mnf+Irp{M)NB*c;0Lv1-U)0%gK1Y2?
+z-KOr0;T`IY8Q+$@wafZ_<U^6W>iN1*8g5OBzTDm2JzNyUUBK<YuRtF#R%g$gJhuT~
+z0;_<>fEP3WWHV`4Nd!78m5S<gb$!yUP@gG<y><j^OZ!)<W3khw4ktSrK7zB!^DEUe
+z>f_;p5A$5FzLzw+B>*<&a?Vm`ssnk61*I4Im#-NYID(nLF`zx6T?-rmUI`lx0j~nb
+zfu-5A7dTh4aYc@CVf0qlb2Q^3L^%qa03HT5m*!jZ+zEXAU(|y0)oOKJwOTz2tjUF%
+z3(QM@p{7@|u?gr%Ukn`1{He$`17M&iiqWDd+JSd~0pMofY^jfLL#4GPzzX0;;7?#B
+z@N+W&J_Du$_W^GKZ9s2nz2zdddLzF9Y{)&@*GwAL$mOTV-$d?<{8SwxTBlA^Uypn!
+zx<5o-(<~K#kd1p%?M_AhM18jofG+ikjL)domKby2L~6k`>K`$%MeR_(9anhD09L8b
+zhj5mu4`hBgRdYh+`0fyhDJ-)?N(a>Q>a$_JzY>APA+KE}kPlw!2g$vqNDQctsB=?t
+zTcgtvhI~{#7~LWDq08|_gt|oCTY9T=>UTNY&vP^*rS(r!Be+}uYW-IA%@n24lEX3e
+qi28QEq8hf@GWBaV1z@rP{5=5Xg>%C#{n45L0000<MNUMnLSTYJd7!EQ
+
+literal 0
+HcmV?d00001
+
+diff --git a/res/drawable-xhdpi/ic_osarmod.png b/res/drawable-xhdpi/ic_osarmod.png
+new file mode 100644
+index 0000000000000000000000000000000000000000..35e6ddf5be275f151461a7fe903e29f94b2e365a
+GIT binary patch
+literal 1926
+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
+M07*qoM6N<$f{6oi{Qv*}
+
+literal 0
+HcmV?d00001
+
+diff --git a/res/values/strings.xml b/res/values/strings.xml
+index 15d6f09..75f1574 100644
+--- a/res/values/strings.xml
++++ b/res/values/strings.xml
+@@ -4789,4 +4789,7 @@
+     <string name="changelog_version">Version</string>
+ 
+     <!-- **** CYANOGENMOD ADDITIONS END **** -->
++
++    <!-- OSARMOD -->
++    <string name="osarmod_settings_title">OSARMOD</string>
+ </resources>
+diff --git a/res/xml/settings_headers.xml b/res/xml/settings_headers.xml
+index 6efe3f3..26a05fe 100644
+--- a/res/xml/settings_headers.xml
++++ b/res/xml/settings_headers.xml
+@@ -243,6 +243,17 @@
+         android:icon="@drawable/ic_settings_performance"
+         android:title="@string/performance_settings_title" />
+ 
++    <!-- OSARMOD -->
++    <header
++        android:id="@+id/osarmod_settings"
++        android:title="@string/osarmod_settings_title"
++        android:icon="@drawable/ic_osarmod">
++        <intent
++            android:action="android.intent.action.MAIN"
++            android:targetPackage="com.osarmod.omparts"
++            android:targetClass="com.osarmod.omparts.OMParts" />
++    </header>
++
+     <!-- About Device -->
+     <header
+         android:id="@+id/about_settings"
+-- 
+1.7.2.5
+
