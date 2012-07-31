@@ -3,7 +3,7 @@
 case $OSARMOD_OS in
     cm9)
 	DEVICE_START=1
-	DEVICE_END=2
+	DEVICE_END=1
 	;;
     cm10)
 	DEVICE_START=3
@@ -11,10 +11,12 @@ case $OSARMOD_OS in
 	;;
 esac
 
-if [ "$DEVBUILD" != "1" ]; then
-    echo "CLEAN UP"
-    cd $ANDROID_BUILD_TOP
-    make clean
+if [ "$1" != "-noclean" ]; then
+    if [ "$DEVBUILD" != "1" ]; then
+	echo "CLEAN UP"
+	cd $ANDROID_BUILD_TOP
+	make clean
+    fi
 fi
 
 for d in $(seq $DEVICE_START $DEVICE_END); do
