@@ -10,23 +10,19 @@ echo -ne "\033]0;[Building] $OSARMOD_TYPE ...\007"
 #
 # PREPARING THE KERNEL
 #
-#case $OSARMOD_DEVICE in
-#    galaxysmtd)
-#	KERNEL_PATH=kernel/samsung/aries
-#	KERNEL_BRANCH=ics
-#	;;
-#    wingray)
-#	KERNEL_PATH=
-#	KERNEL_BRANCH=
-#	;;
-#esac
-#
-#if [ -n "$KERNEL_PATH" ]; then
-#    cd $KERNEL_PATH
-#    #git co $KERNEL_BRANCH
-#    git_changelog.pl > /tmp/GIT_KLOG
-#    cd -
-#fi
+case $OSARMOD_TYPE in
+    galaxysmtd-cm9)
+	KERNEL_PATH=kernel/samsung/aries
+	KERNEL_BRANCH=ics
+	;;
+esac
+
+if [ -n "$KERNEL_PATH" ]; then
+    cd $KERNEL_PATH
+    #git co $KERNEL_BRANCH
+    git_changelog.pl > /tmp/GIT_KLOG
+    cd -
+fi
 
 #
 # VERSION AND CHANGELOG
