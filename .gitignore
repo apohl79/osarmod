@@ -25,3 +25,5 @@ osarmod/wingray_bootimg/*.img
 osarmod/files/GIT_LOG*
 osarmod/files/GIT_KLOG*
 osarmod/CHANGELOG*
+releasebuild.log
+tools/
