@@ -12,17 +12,12 @@ echo -ne "\033]0;[Building] $OSARMOD_TYPE ...\007"
 #
 case $OSARMOD_TYPE in
     galaxysmtd-cm9)
-	KERNEL_PATH=kernel/samsung/aries
-	KERNEL_BRANCH=ics
+	echo "Generating kernel changelog..."
+	cd kernel/samsung/aries
+	git_changelog.pl > /tmp/GIT_KLOG
+	cd -
 	;;
 esac
-
-if [ -n "$KERNEL_PATH" ]; then
-    cd $KERNEL_PATH
-    #git co $KERNEL_BRANCH
-    git_changelog.pl > /tmp/GIT_KLOG
-    cd -
-fi
 
 #
 # VERSION AND CHANGELOG
@@ -147,23 +142,20 @@ cp -r $ROMROOT/$MODEL-$OSARMOD_OS/* $REPACK
 cat $ROMROOT/$MODEL-${OSARMOD_OS}.ext/updater-script >> $REPACK/META-INF/com/google/android/updater-script
 
 echo "Setting ROM version to: $VERSION"
-case $OSARMOD_OS in
-    cm7)
-	cat $REPACK/system/build.prop | grep -vi "ro.osarmod" | sed -e "s/\(ro.modversion=.*\)/ro.modversion=$VERSION/" > $REPACK/system/build.prop.new
-	;;
-    cm9|cm10)
-	cat $REPACK/system/build.prop | grep -vi "ro.osarmod" | sed -e "s/\(ro.cm.version=.*\)/ro.cm.version=$VERSION/" > $REPACK/system/build.prop.new
-	;;
-    *)
-	BUILD_ID=$(cat $REPACK/system/build.prop | grep build.id | sed 's/ro.build.id=//')
-	cat $REPACK/system/build.prop | sed -e "s/\(ro.build.display.id=.*\)/ro.build.display.id=$VERSION ($BUILD_ID)/" > $REPACK/system/build.prop.new
-	;;
-esac
+FILTER="ro.osarmod|ro.config.ringtone|ro.config.notification_sound"
+FILTER_EXT="__EMPTY__"
+if [ -r $ROMROOT/$MODEL-${OSARMOD_OS}.ext/build.prop.filter ]; then
+    FILTER_EXT=$(cat $ROMROOT/$MODEL-${OSARMOD_OS}.ext/build.prop.filter)
+fi
+cat $REPACK/system/build.prop | egrep -vi "$FILTER" | egrep -vi "$FILTER_EXT" | \
+    sed -e "s/\(ro.cm.version=.*\)/ro.cm.version=$VERSION/" > $REPACK/system/build.prop.new
 echo "" >> $REPACK/system/build.prop.new
 echo "# OSARMOD" >> $REPACK/system/build.prop.new
 echo "ro.osarmod.version=$VERSION_NUM" >> $REPACK/system/build.prop.new
 echo "ro.osarmod.ostype=$OSARMOD_OS" >> $REPACK/system/build.prop.new
 echo "ro.osarmod.device=$OSARMOD_DEVICE" >> $REPACK/system/build.prop.new
+echo "ro.config.ringtone=OM1.ogg" >> $REPACK/system/build.prop.new
+echo "ro.config.notification_sound=OM1.ogg" >> $REPACK/system/build.prop.new
 if [ -r $ROMROOT/$MODEL-${OSARMOD_OS}.ext/build.prop ]; then
     cat $ROMROOT/$MODEL-${OSARMOD_OS}.ext/build.prop >> $REPACK/system/build.prop.new
 fi
@@ -203,7 +195,9 @@ fi
 if [ -e /tmp/GIT_LOG ]; then
     mv /tmp/GIT_LOG $TOP/logs/GIT_LOG_${OSARMOD_TYPE}_$VERSION_NUM
 fi
-#mv /tmp/GIT_KLOG $TOP/files/GIT_KLOG_${OSARMOD_TYPE}_$VERSION_NUM
+if [ -e /tmp/GIT_KLOG ]; then
+    mv /tmp/GIT_KLOG $TOP/logs/GIT_KLOG_${OSARMOD_TYPE}_$VERSION_NUM
+fi
 
 echo "ROM finished: $TARGET"
 
