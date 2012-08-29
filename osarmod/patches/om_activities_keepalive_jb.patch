@@ -1,6 +1,6 @@
-From 1d692d829f47027bfcb4a12131b1bad05a93f80b Mon Sep 17 00:00:00 2001
+From 533b9c4e081589f680cc98b54ce70396fdf49e2b Mon Sep 17 00:00:00 2001
 From: Andreas Pohl <apohl79@gmail.com>
-Date: Tue, 28 Aug 2012 22:06:10 +0200
+Date: Wed, 29 Aug 2012 13:29:30 +0200
 Subject: [PATCH] Make activities persistent
 
 The android lowmemorykiller kernel driver is killing processes based on their
@@ -10,19 +10,19 @@ This patch adds support to define a max value for an activity to keep them
 running. This is usefull to speed up loading core activities like the phone or
 contacts.
 
-Change-Id: Ic169ba28041baba45f6636cebd3aa3b1b9cc9381
+Change-Id: I164e88e68ffaaa31010ed06c0a58689cd4ca807b
 ---
- .../android/server/am/ActivityManagerConfig.java   |   57 ++++++++++++++++++++
+ .../android/server/am/ActivityManagerConfig.java   |   59 ++++++++++++++++++++
  .../android/server/am/ActivityManagerService.java  |   14 +++++
- 2 files changed, 71 insertions(+), 0 deletions(-)
+ 2 files changed, 73 insertions(+), 0 deletions(-)
  create mode 100644 services/java/com/android/server/am/ActivityManagerConfig.java
 
 diff --git a/services/java/com/android/server/am/ActivityManagerConfig.java b/services/java/com/android/server/am/ActivityManagerConfig.java
 new file mode 100644
-index 0000000..61a85fd
+index 0000000..e9fa3cf
 --- /dev/null
 +++ b/services/java/com/android/server/am/ActivityManagerConfig.java
-@@ -0,0 +1,57 @@
+@@ -0,0 +1,59 @@
 +/*
 + * Copyright (C) 2012 Andreas Pohl, OSARMOD
 + *
@@ -72,6 +72,8 @@ index 0000000..61a85fd
 +			}
 +		} catch (IOException e) {
 +			Slog.i(TAG, "No config loaded (" + e.getMessage() + ")");
++		} catch (Exception e) {
++			Slog.e(TAG, "Loading config failed: " + e.getMessage());
 +		}
 +	}
 +
