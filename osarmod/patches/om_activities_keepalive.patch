@@ -1,0 +1,126 @@
+From 217ed6df72398f16aa5beeeaae88262d6fc460d2 Mon Sep 17 00:00:00 2001
+From: Andreas Pohl <apohl79@gmail.com>
+Date: Thu, 30 Aug 2012 21:36:59 +0200
+Subject: [PATCH] Make activities persistent
+
+The android lowmemorykiller kernel driver is killing processes based on their
+oom_adj value which is managed by the AcitivityManagerService. The higher the
+value the more likely it is that the lowmemorykiller will kill the process.
+This patch adds support to define a max value for an activity to keep them
+running. This is usefull to speed up loading core activities like the phone or
+contacts.
+
+Change-Id: I90e529bb6a36d34f85dc6a9ff826a0d865546636
+---
+ .../android/server/am/ActivityManagerConfig.java   |   59 ++++++++++++++++++++
+ .../android/server/am/ActivityManagerService.java  |   14 +++++
+ 2 files changed, 73 insertions(+), 0 deletions(-)
+ create mode 100644 services/java/com/android/server/am/ActivityManagerConfig.java
+
+diff --git a/services/java/com/android/server/am/ActivityManagerConfig.java b/services/java/com/android/server/am/ActivityManagerConfig.java
+new file mode 100644
+index 0000000..e9fa3cf
+--- /dev/null
++++ b/services/java/com/android/server/am/ActivityManagerConfig.java
+@@ -0,0 +1,59 @@
++/*
++ * Copyright (C) 2012 Andreas Pohl, OSARMOD
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *      http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++package com.android.server.am;
++
++import java.io.FileInputStream;
++import java.io.FileNotFoundException;
++import java.io.IOException;
++import java.util.Properties;
++import java.util.Enumeration;
++import java.util.HashMap;
++import android.util.Slog;
++
++public final class ActivityManagerConfig {
++	private static final String CONFIG_FILE_NAME = "/system/etc/activitymanager.conf";
++    private static final String TAG = "ActivityManagerConfig";
++
++	// Return this value as default
++	public static final int NO_MAX_OOM_ADJ = Integer.MAX_VALUE;
++
++	// Map process names to the highest oom_adj value
++	private HashMap<String, Integer> mProcNameMap = new HashMap<String, Integer>();
++
++	public ActivityManagerConfig() {
++		Properties p = new Properties();
++		try {
++			p.load(new FileInputStream(CONFIG_FILE_NAME));
++			Enumeration e = p.propertyNames();
++			while (e.hasMoreElements()) {
++				String proc = (String) e.nextElement();
++				Integer adj = Integer.valueOf(p.getProperty(proc));
++				mProcNameMap.put(proc, adj);
++				Slog.i(TAG, "Setting max oom_adj of " + adj + " for " + proc);
++			}
++		} catch (IOException e) {
++			Slog.i(TAG, "No config loaded (" + e.getMessage() + ")");
++		} catch (Exception e) {
++			Slog.e(TAG, "Loading config failed: " + e.getMessage());
++		}
++	}
++
++	public int getMaxOomAdj(String processName) {
++		Integer adj = mProcNameMap.get(processName);
++		return adj != null? adj.intValue(): NO_MAX_OOM_ADJ;
++	}
++}
+diff --git a/services/java/com/android/server/am/ActivityManagerService.java b/services/java/com/android/server/am/ActivityManagerService.java
+index 580126e..31d7782 100644
+--- a/services/java/com/android/server/am/ActivityManagerService.java
++++ b/services/java/com/android/server/am/ActivityManagerService.java
+@@ -28,6 +28,7 @@ import com.android.server.SystemServer;
+ import com.android.server.Watchdog;
+ import com.android.server.am.ActivityStack.ActivityState;
+ import com.android.server.wm.WindowManagerService;
++import com.android.server.am.ActivityManagerConfig;
+ 
+ import dalvik.system.Zygote;
+ 
+@@ -306,6 +307,8 @@ public final class ActivityManagerService extends ActivityManagerNative
+     final BroadcastRecord[] mBroadcastHistory
+             = new BroadcastRecord[MAX_BROADCAST_HISTORY];
+ 
++	ActivityManagerConfig mActivityManagerConfig = new ActivityManagerConfig();
++
+     /**
+      * Set when we current have a BROADCAST_INTENT_MSG in flight.
+      */
+@@ -14364,6 +14367,17 @@ public final class ActivityManagerService extends ActivityManagerNative
+             app.setRawAdj = app.curRawAdj;
+         }
+ 
++		// Check if we should keep this app running and don't modify the oom_adj
++		int maxOomAdjProc = mActivityManagerConfig.getMaxOomAdj(app.processName);
++		if (ActivityManagerConfig.NO_MAX_OOM_ADJ != maxOomAdjProc) {
++			if (app.curAdj > maxOomAdjProc) {
++				if (DEBUG_SWITCH || DEBUG_OOM_ADJ)
++					Slog.w(TAG, "Not setting oom_adj higher than " + maxOomAdjProc + 
++						   " for " + app.processName);
++				app.curAdj = maxOomAdjProc;
++			}
++		}
++
+         if (app.curAdj != app.setAdj) {
+             if (Process.setOomAdj(app.pid, app.curAdj)) {
+                 if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(
+-- 
+1.7.2.5
+
