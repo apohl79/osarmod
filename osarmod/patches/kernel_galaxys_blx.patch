@@ -1,26 +1,27 @@
-From e281e31908be55eb4f960241324fd18795b7c816 Mon Sep 17 00:00:00 2001
+From df402f235ecb878a4c0c4823385dcc850f867de3 Mon Sep 17 00:00:00 2001
 From: Andreas Pohl <apohl79@gmail.com>
-Date: Wed, 28 Mar 2012 19:52:12 +0000
+Date: Mon, 3 Sep 2012 14:43:51 +0200
 Subject: [PATCH] Added BLX
 
+Change-Id: Ie8c9affc3f408bcb3feff2027e5070ef1ad18289
 ---
- drivers/misc/Kconfig             |    6 ++
+ drivers/misc/Kconfig             |    7 +++
  drivers/misc/Makefile            |    1 +
  drivers/misc/blx.c               |  105 ++++++++++++++++++++++++++++++++++++++
  drivers/power/max17040_battery.c |    8 +++
  drivers/power/s5pc110_battery.c  |   13 +++++
  include/linux/blx.h              |   11 ++++
- 6 files changed, 144 insertions(+), 0 deletions(-)
+ 6 files changed, 145 insertions(+), 0 deletions(-)
  create mode 100644 drivers/misc/blx.c
  create mode 100644 include/linux/blx.h
 
 diff --git a/drivers/misc/Kconfig b/drivers/misc/Kconfig
-index 868c1ac..1d15460 100755
+index afdc6bd..b071805 100755
 --- a/drivers/misc/Kconfig
 +++ b/drivers/misc/Kconfig
-@@ -609,4 +609,10 @@ config SAMSUNG_PARAM
+@@ -584,4 +584,11 @@ config PN544
  	help
- 	  Driver for communication with Samsung's secondary bootloader
+ 	  NXP PN544 Near Field Communication controller support.
  
 +config BLX
 +       bool "Support for Battery Life eXtender"
@@ -28,15 +29,16 @@ index 868c1ac..1d15460 100755
 +       help
 +         Say Y here to enable Battery Life eXtender
 +
++
  endif # MISC_DEVICES
 diff --git a/drivers/misc/Makefile b/drivers/misc/Makefile
-index dd26213..fafe410 100755
+index 898516f..d1f2160 100755
 --- a/drivers/misc/Makefile
 +++ b/drivers/misc/Makefile
-@@ -58,3 +58,4 @@ obj-$(CONFIG_SAMSUNG_JACK)	+= sec_jack.o
+@@ -56,3 +56,4 @@ obj-$(CONFIG_PN544)		+= pn544.o
+ obj-$(CONFIG_SAMSUNG_JACK)	+= sec_jack.o
  obj-$(CONFIG_USB_SWITCH_FSA9480)	+= fsa9480.o
  obj-$(CONFIG_SAMSUNG_MODEMCTL) += samsung_modemctl/
- obj-$(CONFIG_SAMSUNG_PARAM)	+= param/
 +obj-$(CONFIG_BLX)              += blx.o
 diff --git a/drivers/misc/blx.c b/drivers/misc/blx.c
 new file mode 100644
@@ -177,7 +179,7 @@ index aedb539..9d5a87a 100755
  }
  
 diff --git a/drivers/power/s5pc110_battery.c b/drivers/power/s5pc110_battery.c
-index cd8779b..5bbd24b 100755
+index 3567e1b..c316113 100755
 --- a/drivers/power/s5pc110_battery.c
 +++ b/drivers/power/s5pc110_battery.c
 @@ -55,6 +55,10 @@
@@ -191,7 +193,7 @@ index cd8779b..5bbd24b 100755
  #define POLLING_INTERVAL	1000
  #define ADC_TOTAL_COUNT		10
  #define ADC_DATA_ARR_SIZE	6
-@@ -471,6 +475,15 @@ static void s3c_bat_discharge_reason(struct chg_data *chg)
+@@ -472,6 +476,15 @@ static void s3c_bat_discharge_reason(struct chg_data *chg)
  	if (chg->set_batt_full)
  		chg->bat_info.dis_reason |= DISCONNECT_BAT_FULL;
  
