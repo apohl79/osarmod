@@ -8,14 +8,18 @@ MODEL=$OSARMOD_DEVICE
 echo -ne "\033]0;[Building] $OSARMOD_TYPE ...\007"
 
 #
-# PREPARING THE KERNEL
+# INITIALIZATION
 #
+SYSTEM_MAX_SIZE=999999999
 case $OSARMOD_TYPE in
     galaxysmtd-cm9)
 	echo "Generating kernel changelog..."
 	cd kernel/samsung/aries
 	git_changelog.pl > /tmp/GIT_KLOG
 	cd -
+	;;
+    wingray-cm10)
+	SYSTEM_MAX_SIZE=268435457
 	;;
 esac
 
@@ -160,6 +164,17 @@ if [ -r $ROMROOT/$MODEL-${OSARMOD_OS}.ext/build.prop ]; then
     cat $ROMROOT/$MODEL-${OSARMOD_OS}.ext/build.prop >> $REPACK/system/build.prop.new
 fi
 mv $REPACK/system/build.prop.new $REPACK/system/build.prop
+
+echo -n "Checking size of system files... "
+s=$(du -s $REPACK/system|awk '{print $1}')
+if [ $s -lt $SYSTEM_MAX_SIZE ]; then
+    echo "ok"
+else
+    echo "failed"
+    sendemail -f root@dubidam.de -t $MAILTO -u "Build for $OSARMOD_TYPE FAILED" -m "$TARGET"
+    echo $VERSION_NUM_OLD > $TOP/files/VERSION_ROM_$OSARMOD_TYPE
+    exit 1
+fi
 
 echo "Repacking..."
 cd $REPACK
