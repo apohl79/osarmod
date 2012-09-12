@@ -1,0 +1,26 @@
+From 5224b0465cb70b27768ccc46c218ada37fca7398 Mon Sep 17 00:00:00 2001
+From: Andreas Pohl <apohl79@gmail.com>
+Date: Mon, 10 Sep 2012 10:50:31 +0200
+Subject: [PATCH] More aggressive lowmemkiller settings for low end devices
+
+Change-Id: Id9f30100a50cc72b415ea36302d5aab33808ec40
+---
+ .../java/com/android/server/am/ProcessList.java    |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/services/java/com/android/server/am/ProcessList.java b/services/java/com/android/server/am/ProcessList.java
+index af7b314..8f5a3e9 100644
+--- a/services/java/com/android/server/am/ProcessList.java
++++ b/services/java/com/android/server/am/ProcessList.java
+@@ -121,7 +121,7 @@ class ProcessList {
+     // HVGA or smaller phone with less than 512MB.  Values are in KB.
+     private final long[] mOomMinFreeLow = new long[] {
+             8192, 12288, 16384,
+-            24576, 28672, 32768
++            32768, 57344, 77824
+     };
+     // These are the high-end OOM level limits.  This is appropriate for a
+     // 1280x800 or larger screen with around 1GB RAM.  Values are in KB.
+-- 
+1.7.2.5
+
