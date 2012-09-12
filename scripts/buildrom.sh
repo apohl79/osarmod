@@ -10,16 +10,12 @@ echo -ne "\033]0;[Building] $OSARMOD_TYPE ...\007"
 #
 # INITIALIZATION
 #
-SYSTEM_MAX_SIZE=999999999
 case $OSARMOD_TYPE in
     galaxysmtd-cm9)
 	echo "Generating kernel changelog..."
 	cd kernel/samsung/aries
 	git_changelog.pl > /tmp/GIT_KLOG
 	cd -
-	;;
-    wingray-cm10)
-	SYSTEM_MAX_SIZE=268435457
 	;;
 esac
 
@@ -58,7 +54,7 @@ if [ "$DEVBUILD" = "1" ]; then
 else
     TARGET=$TOP/build/$OSARMOD_TYPE/osarmod-${OSARMOD_OS}-rom-$MODEL-$VERSION_NUM-signed.zip
 fi
-VERSION=osarmod-${OSARMOD_OS}-$VERSION_NUM
+VERSION=osarmod-$VERSION_NUM
 
 # Set the window title
 echo -ne "\033]0;[Building] $OSARMOD_TYPE (ROM Version $VERSION_NUM) ...\007"
@@ -151,8 +147,10 @@ FILTER_EXT="__EMPTY__"
 if [ -r $ROMROOT/$MODEL-${OSARMOD_OS}.ext/build.prop.filter ]; then
     FILTER_EXT=$(cat $ROMROOT/$MODEL-${OSARMOD_OS}.ext/build.prop.filter)
 fi
+BUILD_ID=$(get_build_var BUILD_ID)
 cat $REPACK/system/build.prop | egrep -vi "$FILTER" | egrep -vi "$FILTER_EXT" | \
-    sed -e "s/\(ro.cm.version=.*\)/ro.cm.version=$VERSION/" > $REPACK/system/build.prop.new
+    sed -e "s/ro.cm.version=.*/ro.cm.version=$VERSION/" | \
+    sed -e "s/ro.build.display.id=.*/ro.build.display.id=$BUILD_ID/" > $REPACK/system/build.prop.new
 echo "" >> $REPACK/system/build.prop.new
 echo "# OSARMOD" >> $REPACK/system/build.prop.new
 echo "ro.osarmod.version=$VERSION_NUM" >> $REPACK/system/build.prop.new
@@ -167,7 +165,7 @@ mv $REPACK/system/build.prop.new $REPACK/system/build.prop
 
 echo -n "Checking size of system files... "
 s=$(du -s $REPACK/system|awk '{print $1}')
-if [ $s -lt $SYSTEM_MAX_SIZE ]; then
+if [ $s -lt $(get_build_var BOARD_SYSTEMIMAGE_PARTITION_SIZE) ]; then
     echo "ok"
 else
     echo "failed"
