@@ -81,7 +81,7 @@ alias goto_romroot="cd $HOME/android/osarmod/romroot/${OSARMOD_TYPE}"
 alias goto_osarmod="cd $HOME/android/osarmod"
 alias goto_build="cd $HOME/android/build/${OSARMOD_TYPE}"
 alias goto_kernel="cd $HOME/android/kernel/osarmod-cm-kernel"
-alias sc="show_changelog.sh | less"
+alias sc="show_changelog.sh -nodevs | less"
 alias devbuild="DEVBUILD=1 buildall.sh"
 alias releasebuild="buildall.sh"
 

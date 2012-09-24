@@ -24,7 +24,12 @@ echo "-----------" >> $CHANGELOG_TMP
 if [ -n "$KERNEL_PATH" ]; then
     git_changelog.pl -b $KERNEL_BRANCH -d $KERNEL_PATH $GIT_KLOG >> $CHANGELOG_TMP
 fi
-git_changelog.pl $GIT_LOG $OSARMOD_DEVICE $OSARMOD_DEVICE_COMMON >> $CHANGELOG_TMP
-
+if [ "$1" = "-nodevs" ]; then
+    # use this for the sc alias, to see the changelog on the command line
+    git_changelog.pl $GIT_LOG >> $CHANGELOG_TMP
+else
+    # at build time we just want to see the device's changes
+    git_changelog.pl $GIT_LOG $OSARMOD_DEVICE $OSARMOD_DEVICE_COMMON >> $CHANGELOG_TMP
+fi
 cat $CHANGELOG_TMP
 
