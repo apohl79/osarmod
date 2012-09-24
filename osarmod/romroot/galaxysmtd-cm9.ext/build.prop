@@ -1,0 +1,6 @@
+ro.osarmod.ota.remote_file=latest_jb
+ro.osarmod.ota.remote_file_dev=latest_jb
+ro.osarmod.ota.version_file=version_jb
+ro.osarmod.ota.version_file_dev=version_jb
+ro.osarmod.ota.wipe_file=wipe_jb
+ro.osarmod.ota.wipe_file_dev=wipe_jb
