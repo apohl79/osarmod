@@ -164,7 +164,7 @@ fi
 mv $REPACK/system/build.prop.new $REPACK/system/build.prop
 
 echo -n "Checking size of system files... "
-s=$(du -s $REPACK/system|awk '{print $1}')
+s=$(du -sb $REPACK/system|awk '{print $1}')
 if [ $s -lt $(get_build_var BOARD_SYSTEMIMAGE_PARTITION_SIZE) ]; then
     echo "ok"
 else
