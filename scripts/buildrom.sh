@@ -22,11 +22,11 @@ esac
 #
 # VERSION AND CHANGELOG
 #
+cd $ANDROID_BUILD_TOP
 if [ "$1" != "-nocompile" ]; then
     VERSION_NUM=$(cat $TOP/files/VERSION_ROM_$OSARMOD_TYPE)
     #GIT_LOG=$TOP/GIT_LOG_${OSARMOD_TYPE}_$VERSION_NUM
     # changelog - compare with old git hashes
-    cd $ANDROID_BUILD_TOP
     show_changelog.sh > /tmp/CHANGELOG
     echo "Updating ROM version..."
     if [ "$DEVBUILD" != "1" ]; then
