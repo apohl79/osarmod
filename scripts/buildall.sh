@@ -19,9 +19,10 @@ if [ "$1" != "-noclean" ]; then
     fi
 fi
 
+rm -f $HOME/android/releasebuild.log
 for d in $(seq $DEVICE_START $DEVICE_END); do
     export OSARMOD_INIT=$d
     . $HOME/android/init.sh
-    buildrom.sh
+    buildrom.sh 2>&1 | tee -a $HOME/android/releasebuild.log
 done
 
