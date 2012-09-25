@@ -10,12 +10,17 @@ echo -ne "\033]0;[Building] $OSARMOD_TYPE ...\007"
 #
 # INITIALIZATION
 #
+SIZE_CHECK=1
 case $OSARMOD_TYPE in
     galaxysmtd-cm9)
 	echo "Generating kernel changelog..."
 	cd kernel/samsung/aries
 	git_changelog.pl > /tmp/GIT_KLOG
 	cd -
+	SIZE_CHECK=0
+	;;
+    galaxysmtd-cm10)
+	SIZE_CHECK=0
 	;;
 esac
 
@@ -23,6 +28,8 @@ esac
 # VERSION AND CHANGELOG
 #
 cd $ANDROID_BUILD_TOP
+. build/envsetup.sh
+VERSION_NUM_OLD=$(cat $TOP/files/VERSION_ROM_$OSARMOD_TYPE)
 if [ "$1" != "-nocompile" ]; then
     VERSION_NUM=$(cat $TOP/files/VERSION_ROM_$OSARMOD_TYPE)
     #GIT_LOG=$TOP/GIT_LOG_${OSARMOD_TYPE}_$VERSION_NUM
@@ -82,8 +89,6 @@ esac
 
 if [ "$1" != "-nocompile" ]; then
     echo "Building Android..."
-    cd $ANDROID_BUILD_TOP
-    . build/envsetup.sh
     if [ "$1" = "-clean" ]; then
 	$CLEANCMD
     fi
@@ -163,15 +168,18 @@ if [ -r $ROMROOT/$MODEL-${OSARMOD_OS}.ext/build.prop ]; then
 fi
 mv $REPACK/system/build.prop.new $REPACK/system/build.prop
 
-echo -n "Checking size of system files... "
-s=$(du -sb $REPACK/system|awk '{print $1}')
-if [ $s -lt $(get_build_var BOARD_SYSTEMIMAGE_PARTITION_SIZE) ]; then
-    echo "ok"
-else
-    echo "failed"
-    sendemail -f root@dubidam.de -t $MAILTO -u "Build for $OSARMOD_TYPE FAILED" -m "$TARGET"
-    echo $VERSION_NUM_OLD > $TOP/files/VERSION_ROM_$OSARMOD_TYPE
-    exit 1
+if [ $SIZE_CHECK = 1 ]; then
+    echo -n "Checking size of system files... "
+    s=$(du -sb $REPACK/system|awk '{print $1}')
+    part=$(get_build_var BOARD_SYSTEMIMAGE_PARTITION_SIZE)
+    if [ $s -lt $part ]; then
+	echo "ok"
+    else
+	echo "failed ($s > $part)"
+	sendemail -f root@dubidam.de -t $MAILTO -u "Build for $OSARMOD_TYPE FAILED" -m "$TARGET"
+	echo $VERSION_NUM_OLD > $TOP/files/VERSION_ROM_$OSARMOD_TYPE
+	exit 1
+    fi
 fi
 
 echo "Repacking..."
