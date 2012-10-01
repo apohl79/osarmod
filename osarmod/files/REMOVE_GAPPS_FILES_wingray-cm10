@@ -1,6 +1,7 @@
-GalleryGoogle.apk
-GenieWidget.apk
-Music2.apk
-GmsCore.apk
-Phonesky.apk
-LatinImeDictionaryPack.apk
+system/app/GalleryGoogle.apk
+system/app/GenieWidget.apk
+system/app/Music2.apk
+system/app/GmsCore.apk
+system/app/GoogleTTS.apk
+system/app/LatinImeDictionaryPack.apk
+tts/
