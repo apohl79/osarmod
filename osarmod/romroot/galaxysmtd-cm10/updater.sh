@@ -21,6 +21,17 @@ set_log() {
     exec >> $1 2>&1
 }
 
+# ui_print by Chainfire
+OUTFD=$(/tmp/busybox ps | /tmp/busybox grep -v "grep" | /tmp/busybox grep -o -E "update_binary(.*)" | /tmp/busybox cut -d " " -f 3);
+ui_print() {
+  if [ $OUTFD != "" ]; then
+    echo "ui_print ${1} " 1>&$OUTFD;
+    echo "ui_print " 1>&$OUTFD;
+  else
+    echo "${1}";
+  fi;
+}
+
 set -x
 export PATH=/:/sbin:/system/xbin:/system/bin:/tmp:$PATH
 
@@ -29,14 +40,14 @@ if /tmp/busybox test "$1" = cdma ; then
     # CDMA mode
     IS_GSM='/tmp/busybox false'
     SD_PART='/dev/block/mmcblk1p1'
-    DATA_PART='/dev/block/mmcblk0p1'
-    DATA_SIZE='490733568'
+    MMC_PART='/dev/block/mmcblk0p1 /dev/block/mmcblk0p2'
+    MTD_SIZE='490733568'
 else
     # GSM mode
     IS_GSM='/tmp/busybox true'
     SD_PART='/dev/block/mmcblk0p1'
-    DATA_PART='/dev/block/mmcblk0p2'
-    DATA_SIZE='442499072'
+    MMC_PART='/dev/block/mmcblk0p2'
+    MTD_SIZE='442499072'
 fi
 
 # check for old/non-cwm recovery.
@@ -83,12 +94,20 @@ if /tmp/busybox test -e /dev/block/bml7 ; then
     if [ "$?" != "0" ] ; then
         exit 3
     fi
+
+    if /tmp/busybox test -d /sdcard/recovery ; then
+	/tmp/busybox mkdir /sdcard/recovery
+    fi
+    /tmp/busybox echo "--wipe-data" > /sdcard/recovery/command
+    /tmp/busybox echo "--update_package=$UPDATE_PACKAGE" >> /sdcard/recovery/command
+
     /tmp/busybox sync
 
-    /sbin/reboot now
+    /sbin/reboot recovery
     exit 0
 
-elif /tmp/busybox test `/tmp/busybox cat /sys/class/mtd/mtd2/size` != "$DATA_SIZE" ; then
+elif /tmp/busybox test `/tmp/busybox cat /sys/class/mtd/mtd2/size` != "$MTD_SIZE" || \
+    /tmp/busybox test `/tmp/busybox cat /sys/class/mtd/mtd2/name` != "datadata" ; then
     # we're running on a mtd (old) device
 
     # make sure sdcard is mounted
@@ -112,11 +131,11 @@ elif /tmp/busybox test `/tmp/busybox cat /sys/class/mtd/mtd2/size` != "$DATA_SIZ
     # write new kernel to boot partition
     /tmp/bml_over_mtd.sh boot 72 reservoir 2004 /tmp/boot.img
 
-    # Remove /system/build.prop to trigger emergency boot
-    /tmp/busybox mount /system
-    /tmp/busybox rm -f /system/build.prop
-    /tmp/busybox umount -l /system
-    
+	# Remove /system/build.prop to trigger emergency boot
+	/tmp/busybox mount /system
+	/tmp/busybox rm -f /system/build.prop
+	/tmp/busybox umount -l /system
+
     if /tmp/busybox test -d /sdcard/recovery ; then
 	/tmp/busybox mkdir /sdcard/recovery
     fi
@@ -189,13 +208,22 @@ elif /tmp/busybox test -e /dev/block/mtdblock0 ; then
     # remove the cyanogenmod.cfg to prevent this from looping
     /tmp/busybox rm -f /sdcard/cyanogenmod.cfg
 
-    # unmount and format system (recovery seems to expect system to be unmounted)
+    # unmount system and data (recovery seems to expect system to be unmounted)
     /tmp/busybox umount -l /system
-    /tmp/make_ext4fs -b 4096 -g 32768 -i 8192 -I 256 -a /system $DATA_PART
-
-    # unmount and format data
     /tmp/busybox umount -l /data
-    /tmp/erase_image userdata
+
+    # setup lvm volumes
+    /lvm/sbin/lvm pvcreate $MMC_PART
+    /lvm/sbin/lvm vgcreate lvpool $MMC_PART
+    /lvm/sbin/lvm lvcreate -L 400M -n system lvpool
+    /lvm/sbin/lvm lvcreate -l 100%FREE -n userdata lvpool
+
+    # format data (/system will be formatted by updater-script)
+    /tmp/make_ext4fs -b 4096 -g 32768 -i 8192 -I 256 -l -16384 -a /data /dev/lvpool/userdata
+
+    # unmount and format datadata
+    /tmp/busybox umount -l /datadata
+    /tmp/erase_image datadata
 
     # restart into recovery so the user can install further packages before booting
     /tmp/busybox touch /cache/.startrecovery
