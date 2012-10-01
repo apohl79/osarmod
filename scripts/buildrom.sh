@@ -177,7 +177,9 @@ if [ $SIZE_CHECK = 1 ]; then
     else
 	echo "failed ($s > $part)"
 	sendemail -f root@dubidam.de -t $MAILTO -u "Build for $OSARMOD_TYPE FAILED" -m "$TARGET"
-	echo $VERSION_NUM_OLD > $TOP/files/VERSION_ROM_$OSARMOD_TYPE
+	if [ "$1" != "-nocompile" ]; then
+	    echo $VERSION_NUM_OLD > $TOP/files/VERSION_ROM_$OSARMOD_TYPE
+	fi
 	exit 1
     fi
 fi
