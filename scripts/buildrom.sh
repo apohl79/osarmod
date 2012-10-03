@@ -22,6 +22,9 @@ case $OSARMOD_TYPE in
     galaxysmtd-cm10)
 	SIZE_CHECK=0
 	;;
+    wingray-cm10)
+	SIZE_CHECK=0
+	;;
 esac
 
 #
@@ -145,6 +148,9 @@ find $ROMROOT/$MODEL-$OSARMOD_OS/ -type f | perl -ne "s|$ROMROOT/$MODEL-$OSARMOD
 cp -r $ROMROOT/$MODEL-$OSARMOD_OS/* $REPACK
 
 cat $ROMROOT/$MODEL-${OSARMOD_OS}.ext/updater-script >> $REPACK/META-INF/com/google/android/updater-script
+if [ -x $ROMROOT/$MODEL-${OSARMOD_OS}.ext/run.sh ]; then
+    REPACK=$REPACK $ROMROOT/$MODEL-${OSARMOD_OS}.ext/run.sh
+fi
 
 echo "Setting ROM version to: $VERSION"
 FILTER="ro.osarmod|ro.config.ringtone|ro.config.notification_sound"
