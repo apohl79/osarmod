@@ -167,7 +167,7 @@ echo "# OSARMOD" >> $REPACK/system/build.prop.new
 echo "ro.osarmod.version=$VERSION_NUM" >> $REPACK/system/build.prop.new
 echo "ro.osarmod.ostype=$OSARMOD_OS" >> $REPACK/system/build.prop.new
 echo "ro.osarmod.device=$OSARMOD_DEVICE" >> $REPACK/system/build.prop.new
-echo "ro.config.ringtone=OM1.ogg" >> $REPACK/system/build.prop.new
+echo "ro.config.ringtone=OM3.ogg" >> $REPACK/system/build.prop.new
 echo "ro.config.notification_sound=OM1.ogg" >> $REPACK/system/build.prop.new
 if [ -r $ROMROOT/$MODEL-${OSARMOD_OS}.ext/build.prop ]; then
     cat $ROMROOT/$MODEL-${OSARMOD_OS}.ext/build.prop >> $REPACK/system/build.prop.new
