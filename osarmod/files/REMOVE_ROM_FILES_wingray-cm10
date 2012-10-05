@@ -5,8 +5,6 @@ system/lib/libjackpal-androidterm4.so
 system/app/CMWallpapers.apk
 system/app/CMUpdater.apk
 system/app/HoloSpiralWallpaper.apk
-system/app/LatinIME.apk
-system/app/LatinImeDictionaryPack.apk
 system/app/LiveWallpapers.apk
 system/app/LiveWallpapersPicker.apk
 system/app/MagicSmokeWallpapers.apk
