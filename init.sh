@@ -5,10 +5,8 @@ export PATH=$PATH:$HOME/android/scripts
 if [ -z $OSARMOD_INIT ]; then
     echo "Target device selection:"
     echo ""
-    echo "  [1] Galaxy S - CM9"
-    echo "  [2] Xoom (US WiFi) - CM9"
-    echo "  [3] Galaxy S - CM10"
-    echo "  [4] Xoom (US WiFi) - CM10"
+    echo "  [1] Galaxy S - CM10"
+    echo "  [2] Xoom (US WiFi) - CM10"
     echo ""
     echo -n "Choose target [none]: "
     read N
@@ -20,28 +18,12 @@ case $N in
     1)
 	target=galaxysmtd
 	init=breakfast
-	system=android/system_ics
-	device=galaxysmtd
-	device_common=aries-common
-	os=cm9
-	;;
-    2)
-	target=wingray
-	init=breakfast
-	system=android/system_ics
-	device=wingray
-	device_common=moto/common
-	os=cm9
-	;;
-    3)
-	target=galaxysmtd
-	init=breakfast
 	system=android/system_jellybean
 	device=galaxysmtd
 	device_common=aries-common
 	os=cm10
 	;;
-    4)
+    2)
 	target=wingray
 	init=breakfast
 	system=android/system_jellybean
