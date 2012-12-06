@@ -3,11 +3,11 @@
 REPOS="frameworks/base packages/apps/Settings packages/apps/Exchange device/samsung/aries-common device/samsung/galaxysmtd device/moto/wingray kernel/samsung/aries kernel/motorola/stingray"
 
 # update OMParts
-echo "updating OMParts..."
-cd packages/apps/OMParts
-git pull origin master;
-cd - >/dev/null
-echo ""
+#echo "updating OMParts..."
+#cd packages/apps/OMParts
+#git pull origin master;
+#cd - >/dev/null
+#echo ""
 
 # stash patches
 echo "stashing local changes... (see /tmp/stash.log for details)"

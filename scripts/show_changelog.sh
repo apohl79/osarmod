@@ -26,7 +26,20 @@ if [ -n "$KERNEL_PATH" ]; then
 fi
 if [ "$1" = "-nodevs" ]; then
     # use this for the sc alias, to see the changelog on the command line
-    git_changelog.pl $GIT_LOG >> $CHANGELOG_TMP
+    if [ "$2" != "-all" ]; then
+	N=1
+	CHK_GIT_LOG=$GIT_LOG-dev$N
+	while [ -e $CHK_GIT_LOG ]; do
+	    GIT_LOG_DEV=$CHK_GIT_LOG
+	    let N++
+	    CHK_GIT_LOG=$GIT_LOG-dev$N
+	done
+    fi
+    if [ -n "$GIT_LOG_DEV" ]; then
+	git_changelog.pl $GIT_LOG_DEV >> $CHANGELOG_TMP
+    else
+	git_changelog.pl $GIT_LOG >> $CHANGELOG_TMP
+    fi
 else
     # at build time we just want to see the device's changes
     git_changelog.pl $GIT_LOG $OSARMOD_DEVICE $OSARMOD_DEVICE_COMMON >> $CHANGELOG_TMP

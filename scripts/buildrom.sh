@@ -5,12 +5,28 @@ TOP=$HOME/android/osarmod
 ROMROOT=$TOP/romroot
 MODEL=$OSARMOD_DEVICE
 
-echo -ne "\033]0;[Building] $OSARMOD_TYPE ...\007"
+# trap ctrl-c and call ctrl_c()
+trap ctrl_c INT
+
+function ctrl_c() {
+    omsettitle "$OSARMOD_TITLE"
+    exit 1
+}
+
+function omsettitle() {
+    if [ -n "$STY" ] ; then # We are in a screen session
+	printf "\033k%s\033\\" "$@"
+    else
+	printf "\033]0;%s\007" "$@"
+    fi
+}
+
+omsettitle "[Building] $OSARMOD_TYPE ..."
 
 #
 # INITIALIZATION
 #
-SIZE_CHECK=1
+SIZE_CHECK=0
 case $OSARMOD_TYPE in
     galaxysmtd-cm9)
 	echo "Generating kernel changelog..."
@@ -55,40 +71,32 @@ GAPPS=$TOP/gapps_$OSARMOD_TYPE
 GAPPS_ALT=$TOP/gapps_$OSARMOD_OS
 if [ "$DEVBUILD" = "1" ]; then
     N=1
-    TARGET=$TOP/build/$OSARMOD_TYPE/osarmod-${OSARMOD_OS}-rom-$MODEL-$VERSION_NUM-dev$N-signed.zip
+    TARGET=$TOP/build/$OSARMOD_TYPE/ionix-rom-$MODEL-$VERSION_NUM-dev$N-signed.zip
     while [ -e $TARGET ]; do
 	let N++
-	TARGET=$TOP/build/$OSARMOD_TYPE/osarmod-${OSARMOD_OS}-rom-$MODEL-$VERSION_NUM-dev$N-signed.zip
+	TARGET=$TOP/build/$OSARMOD_TYPE/ionix-rom-$MODEL-$VERSION_NUM-dev$N-signed.zip
     done
     VERSION_NUM=$VERSION_NUM-dev$N
 else
-    TARGET=$TOP/build/$OSARMOD_TYPE/osarmod-${OSARMOD_OS}-rom-$MODEL-$VERSION_NUM-signed.zip
+    TARGET=$TOP/build/$OSARMOD_TYPE/ionix-rom-$MODEL-$VERSION_NUM-signed.zip
 fi
-VERSION=osarmod-$VERSION_NUM
+VERSION=ionix-$VERSION_NUM
+
+if [ ! -d $TOP/build/$OSARMOD_TYPE ]; then
+    echo "Creating target direcory $TOP/build/${OSARMOD_TYPE}..."
+    mkdir -p $TOP/build/$OSARMOD_TYPE
+fi
 
 # Set the window title
-echo -ne "\033]0;[Building] $OSARMOD_TYPE (ROM Version $VERSION_NUM) ...\007"
+omsettitle "[Building] $OSARMOD_TYPE (ROM Version $VERSION_NUM)..."
 
 #
 # COMPILE
 #
-case $OSARMOD_OS in
-    cm*)
-	OTAFILE="cm-*.zip"
-	CLEANCMD="mka clean"
-	BUILDCMD="mka bacon"
-	export CYANOGEN_RELEASE=1 
-	;;
-    ics-*)
-	OTAFILE="full_*.zip"
-	CLEANCMD="make clean"
-	BUILDCMD="make -j9"
-	;;
-    *)
-	echo "OSARMOD_OS $OSARMOD_OS not supported"
-	exit
-	;;
-esac
+OTAFILE="cm-*.zip"
+CLEANCMD="mka clean"
+BUILDCMD="mka bacon"
+export CYANOGEN_RELEASE=1 
 
 if [ "$1" != "-nocompile" ]; then
     echo "Building Android..."
@@ -102,6 +110,7 @@ else
 	OTAZIP=$3
 	if [ ! -e $OTAZIP ]; then
 	    echo "$OTAZIP not found"
+	    omsettitle "$OSARMOD_TITLE"
 	    exit 1
 	fi
     else
@@ -116,6 +125,7 @@ fi
 if [ ! -e "$OTAZIP" ]; then
     sendemail -f root@dubidam.de -t $MAILTO -u "Build for $OSARMOD_TYPE FAILED" -m "$TARGET"
     echo $VERSION_NUM_OLD > $TOP/files/VERSION_ROM_$OSARMOD_TYPE
+    omsettitle "$OSARMOD_TITLE"
     exit 1
 fi
 
@@ -174,6 +184,9 @@ if [ -r $ROMROOT/$MODEL-${OSARMOD_OS}.ext/build.prop ]; then
 fi
 mv $REPACK/system/build.prop.new $REPACK/system/build.prop
 
+echo "Calculating size of the system files..."
+du -sb $REPACK/system
+
 if [ $SIZE_CHECK = 1 ]; then
     echo -n "Checking size of system files... "
     s=$(du -sb $REPACK/system|awk '{print $1}')
@@ -186,6 +199,7 @@ if [ $SIZE_CHECK = 1 ]; then
 	if [ "$1" != "-nocompile" ]; then
 	    echo $VERSION_NUM_OLD > $TOP/files/VERSION_ROM_$OSARMOD_TYPE
 	fi
+	omsettitle "$OSARMOD_TITLE"
 	exit 1
     fi
 fi
@@ -233,3 +247,6 @@ echo "ROM finished: $TARGET"
 sendemail -f root@dubidam.de -t $MAILTO -u "Build for $OSARMOD_TYPE finished" -m "$TARGET"
 
 # END OF REPACKING
+
+omsettitle "$OSARMOD_TITLE"
+
