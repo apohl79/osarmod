@@ -21,7 +21,12 @@ function omsettitle() {
     fi
 }
 
-omsettitle "[Building] $OSARMOD_TYPE ..."
+cd $ANDROID_BUILD_TOP
+. build/envsetup.sh
+
+# Sync
+omsettitle "[Building] ${OSARMOD_TYPE} (syncing source tree)..."
+repo sync -j8
 
 #
 # INITIALIZATION
@@ -46,8 +51,7 @@ esac
 #
 # VERSION AND CHANGELOG
 #
-cd $ANDROID_BUILD_TOP
-. build/envsetup.sh
+omsettitle "[Building] ${OSARMOD_TYPE} (generating version/changelog)..."
 VERSION_NUM_OLD=$(cat $TOP/files/VERSION_ROM_$OSARMOD_TYPE)
 if [ "$1" != "-nocompile" ]; then
     VERSION_NUM=$(cat $TOP/files/VERSION_ROM_$OSARMOD_TYPE)
