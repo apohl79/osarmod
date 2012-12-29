@@ -1,0 +1,6 @@
+package_extract_file("updater-modem.sh", "/tmp/updater-modem.sh");
+set_perm(0, 0, 0777, "/tmp/updater-modem.sh");
+assert(run_program("/tmp/updater-modem.sh") == 0);
+run_program("/sbin/mount", "/data");
+package_extract_dir("data", "/data");
+unmount("/data");

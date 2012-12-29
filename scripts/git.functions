@@ -1,0 +1,56 @@
+_col_red="\033[31m"
+_col_grn="\033[32m"
+_col_rst="\033[0m"
+
+function fetch_merge() {
+    _fetch_merge jb cm cm-10.1 jellybean
+}
+
+# Fetch and merge remote branches automatically
+# Usage: _fetch_merge lb r rb [rb2...]
+#   lb: local branch
+#   r : git remote 
+#   rb: remote branch
+function _fetch_merge() {
+    branch=$1
+    shift
+    remote=$1
+    shift
+    for d in $(find . -maxdepth 1 -type d | egrep "^./" | sed 's,./,,'); do
+	cd $d
+	# do we have "cm" remote
+	if [ -n "$(git remote | grep $remote)" ]; then
+	    if [ "* $branch" != "$(git branch | grep $branch)" ]; then
+	        # switch to branch
+		echo -e "[$_col_grn$d$_col_rst] Checking out branch $branch..." 
+		git co $branch
+	    fi
+	    # check that we are on the right branch
+	    if [ "* $branch" = "$(git branch | grep $branch)" ]; then
+		echo -e "[$_col_grn$d$_col_rst] Fetching changes from $remote..." 
+		git fetch $remote
+		merged=0
+		for remote_branch in $*; do
+		    if [ -n "$(git branch -r | grep $remote/$remote_branch)" ]; then
+			echo -e "[$_col_grn$d$_col_rst] Merging changes from $remote/$remote_branch..." 
+			git merge $remote/$remote_branch
+			merged=1
+			break
+		    fi
+		done
+		if [ $merged = 1 ]; then
+		    echo -e "[$_col_grn$d$_col_rst] Pushing changes from $remote/$remote_branch..." 
+		    git push origin $branch
+		else
+		    echo -e "[$_col_grn$d$_col_rst]$_col_red No matching remote branch found"
+		fi
+	    else
+		echo -e "[$_col_grn$d$_col_rst]$_col_red Not on the '$branch' branch, skipping$_col_rst"
+	    fi
+	else
+	    echo -e "[$_col_grn$d$_col_rst]$_col_red No remote '$remote' found, skipping$_col_rst"
+	fi
+	echo
+	cd ..
+    done
+}

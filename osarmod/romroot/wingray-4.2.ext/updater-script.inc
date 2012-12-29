@@ -1,0 +1,35 @@
+assert(getprop("ro.product.device") == "wingray" || getprop("ro.build.product") == "wingray" || 
+       getprop("ro.product.device") == "stingray" || getprop("ro.build.product") == "stingray" || 
+       getprop("ro.product.device") == "everest" || getprop("ro.build.product") == "everest");
+mount("ext4", "EMMC", "/dev/lvpool/system", "/system");
+show_progress(0.500000, 0);
+package_extract_dir("system", "/system");
+set_perm_recursive(0, 0, 0755, 0644, "/system");
+set_perm_recursive(0, 0, 0755, 0755, "/system/addon.d");
+set_perm_recursive(0, 2000, 0755, 0755, "/system/bin");
+set_perm(0, 3003, 02750, "/system/bin/netcfg");
+set_perm(0, 3004, 02755, "/system/bin/ping");
+set_perm(0, 2000, 06750, "/system/bin/run-as");
+set_perm(1002, 1002, 0440, "/system/etc/dbus.conf");
+set_perm(1014, 2000, 0550, "/system/etc/dhcpcd/dhcpcd-run-hooks");
+set_perm_recursive(0, 2000, 0755, 0755, "/system/etc/init.d");
+set_perm(0, 0, 0755, "/system/etc/init.d");
+set_perm(0, 2000, 0550, "/system/etc/init.goldfish.sh");
+set_perm_recursive(0, 0, 0755, 0555, "/system/etc/ppp");
+set_perm(0, 2000, 0755, "/system/vendor");
+set_perm_recursive(0, 2000, 0755, 0644, "/system/vendor/etc");
+set_perm(0, 0, 0644, "/system/vendor/etc/audio_effects.conf");
+set_perm(0, 2000, 0755, "/system/vendor/firmware");
+set_perm_recursive(0, 2000, 0755, 0644, "/system/vendor/lib");
+set_perm(0, 0, 0644, "/system/vendor/lib/libbt-vendor.so");
+set_perm_recursive(0, 2000, 0755, 0755, "/system/xbin");
+set_perm(0, 0, 06755, "/system/xbin/librank");
+set_perm(0, 0, 06755, "/system/xbin/procmem");
+set_perm(0, 0, 06755, "/system/xbin/procrank");
+set_perm(0, 0, 06755, "/system/xbin/su");
+show_progress(0.200000, 0);
+show_progress(0.200000, 10);
+show_progress(0.200000, 10);
+package_extract_file("boot.img", "/dev/block/platform/sdhci-tegra.3/by-name/boot");
+show_progress(0.100000, 0);
+unmount("/system");

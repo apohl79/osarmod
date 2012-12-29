@@ -1,9 +1,9 @@
 #!/bin/bash
 
 case $OSARMOD_OS in
-    cm10)
-	DEVICE_START=1
-	DEVICE_END=2
+    4.2)
+	DEVICE_START=2
+	DEVICE_END=3
 	;;
 esac
 

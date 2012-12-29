@@ -1,0 +1,5 @@
+#!/system/bin/sh
+#
+# Print startup info
+#
+log -p i -t ionix "Welcome to IONIX `getprop ro.osarmod.version`";

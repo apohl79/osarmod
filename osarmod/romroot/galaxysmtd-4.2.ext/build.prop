@@ -1,0 +1,3 @@
+ro.osarmod.ota.download=/storage/sdcard1
+ro.vold.switchablepair=/storage/sdcard1,/storage/sdcard0
+persist.sys.vold.switchexternal=1

@@ -2,16 +2,17 @@
 
 export PATH=$PATH:$HOME/android/scripts
 
+. $HOME/android/scripts/git.functions
+
 if [ -z $OSARMOD_INIT ]; then
     echo "Target device selection:"
     echo ""
-    echo "Android 4.1:"
+    echo "Android 4.0:"
     echo "  [1] Galaxy S"
-    echo "  [2] Xoom (US WiFi)"
     echo ""
     echo "Android 4.2:"
-    echo "  [3] Galaxy S"
-    echo "  [4] Xoom (US WiFi)"
+    echo "  [2] Nexus 4"
+    echo "  [3] Xoom (US WiFi)"
     echo ""
     echo -n "Choose target [none]: "
     read N
@@ -23,28 +24,20 @@ case $N in
     1)
 	target=galaxysmtd
 	init=breakfast
-	system=android/system_jellybean
+	system=android/system_ics
 	device=galaxysmtd
 	device_common=aries-common
-	os=cm10
+	os=cm9
 	;;
     2)
-	target=wingray
-	init=breakfast
-	system=android/system_jellybean
-	device=wingray
-	device_common=moto/common
-	os=cm10
-	;;
-    3)
-	target=galaxysmtd
+	target=mako
 	init=breakfast
 	system=android/system_jb
-	device=galaxysmtd
-	device_common=aries-common
+	device=mako
+	device_common=
 	os=4.2
 	;;
-    4)
+    3)
 	target=wingray
 	init=breakfast
 	system=android/system_jb
@@ -89,10 +82,12 @@ export PS1='\[\033[01;32m\]\u@\h (${OSARMOD_TYPE})\[\033[00m\]:\[\033[01;34m\]\w
 alias goto_system="cd $HOME/$system"
 alias goto_romroot="cd $HOME/android/osarmod/romroot/${OSARMOD_TYPE}"
 alias goto_osarmod="cd $HOME/android/osarmod"
+alias goto_git="cd $HOME/android/git"
 alias goto_build="cd $HOME/android/build/${OSARMOD_TYPE}"
 alias goto_kernel="cd $HOME/android/kernel/osarmod-cm-kernel"
 alias sc="show_changelog.sh -nodevs | less"
 alias sc_all="show_changelog.sh -nodevs -all | less"
+alias rs8="repo sync -j8"
 alias devbuild="DEVBUILD=1 buildall.sh"
 alias releasebuild="buildall.sh"
 
@@ -100,34 +95,3 @@ alias edit_changelog="emacs $HOME/android/osarmod/CHANGELOG_${OSARMOD_TYPE}_NEW"
 alias edit_romversion="emacs $HOME/android/osarmod/files/VERSION_ROM_${OSARMOD_TYPE}"
 alias edit_remove_rom_files="emacs $HOME/android/osarmod/files/REMOVE_ROM_FILES_${OSARMOD_TYPE}"
 alias edit_remove_gapps_files="emacs $HOME/android/osarmod/files/REMOVE_GAPPS_FILES_${OSARMOD_TYPE}"
-
-_col_red="\033[31m"
-_col_grn="\033[32m"
-_col_rst="\033[0m"
-
-function fetch_merge() {
-    remote="cm"
-    remote_branch="mr1-staging"
-    branch="jb"
-    for d in $(find . -maxdepth 1 -type d | egrep "^./" | sed 's,./,,'); do
-	cd $d
-	# do we have "cm" remote
-	if [ -n "$(git remote | grep $remote)" ]; then
-	    # are we on the right branch
-	    if [ "* $branch" = "$(git branch | grep $branch)" ]; then
-		echo -e "[$_col_grn$d$_col_rst] Fetching changes from $remote..." 
-		git fetch $remote
-		echo -e "[$_col_grn$d$_col_rst] Merging changes from $remote/$remote_branch..." 
-		git merge $remote/$remote_branch
-		echo -e "[$_col_grn$d$_col_rst] Pushing changes from $remote/remote_branch..." 
-		git push origin jb
-	    else
-		echo -e "[$_col_grn$d$_col_rst]$_col_red Not on the '$branch' branch, skipping$_col_rst"
-	    fi
-	else
-	    echo -e "[$_col_grn$d$_col_rst]$_col_red No remote '$remote' found, skipping$_col_rst"
-	fi
-	echo
-	cd ..
-    done
-}
