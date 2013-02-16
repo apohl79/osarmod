@@ -326,6 +326,8 @@ function cleanup() {
 	ln -s $TARGET_INC $TARGET_INC_DEV
     else
         # update build dir 
+	mv $TOP/build/$OSARMOD_TYPE/version_dev $TOP/build/$OSARMOD_TYPE/version_dev_prev
+	mv $TOP/build/$OSARMOD_TYPE/latest_dev $TOP/build/$OSARMOD_TYPE/previous_dev
 	echo $VERSION_NUM > $TOP/build/$OSARMOD_TYPE/version_dev
 	rm -f $TOP/build/$OSARMOD_TYPE/latest_dev
 	ln -s $TARGET $TOP/build/$OSARMOD_TYPE/latest_dev
