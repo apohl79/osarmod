@@ -7,8 +7,8 @@ export PATH=$PATH:$HOME/android/scripts
 if [ -z $OSARMOD_INIT ]; then
     echo "Target device selection:"
     echo ""
-    echo "Android 4.0:"
-    echo "  [1] Galaxy S"
+    echo "Android 4.1:"
+    echo "  [1] Xoom (US WiFi)"
     echo ""
     echo "Android 4.2:"
     echo "  [2] Nexus 4"
@@ -22,12 +22,12 @@ fi
 
 case $N in 
     1)
-	target=galaxysmtd
+	target=wingray
 	init=breakfast
-	system=android/system_ics
-	device=galaxysmtd
-	device_common=aries-common
-	os=cm9
+	system=android/system_jellybean
+	device=wingray
+	device_common=moto/common
+	os=cm10
 	;;
     2)
 	target=mako
@@ -90,6 +90,7 @@ alias sc_all="show_changelog.sh -nodevs -all | less"
 alias rs8="repo sync -j8"
 alias devbuild="DEVBUILD=1 buildall.sh"
 alias releasebuild="buildall.sh"
+alias make_kernel='CROSS_COMPILE=$ARM_EABI_TOOLCHAIN/arm-eabi- ARCH=arm SUBARCH=arm make -j8'
 
 alias edit_changelog="emacs $HOME/android/osarmod/CHANGELOG_${OSARMOD_TYPE}_NEW"
 alias edit_romversion="emacs $HOME/android/osarmod/files/VERSION_ROM_${OSARMOD_TYPE}"
