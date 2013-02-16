@@ -20,13 +20,13 @@ function _fetch_merge() {
 	cd $d
 	# do we have "cm" remote
 	if [ -n "$(git remote | grep $remote)" ]; then
-	    if [ "* $branch" != "$(git branch | grep $branch)" ]; then
+	    if [ "* $branch" != "$(git branch | grep "$branch\$")" ]; then
 	        # switch to branch
 		echo -e "[$_col_grn$d$_col_rst] Checking out branch $branch..." 
 		git co $branch
 	    fi
 	    # check that we are on the right branch
-	    if [ "* $branch" = "$(git branch | grep $branch)" ]; then
+	    if [ "* $branch" = "$(git branch | grep "$branch\$")" ]; then
 		echo -e "[$_col_grn$d$_col_rst] Fetching changes from $remote..." 
 		git fetch $remote
 		merged=0
