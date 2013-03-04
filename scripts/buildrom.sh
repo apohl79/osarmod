@@ -22,6 +22,9 @@ function main() {
     echo ""
     ls -sh $TARGET
     ls -sh $TARGET_INC
+    if [ "$TARGET_INC" != "$TARGET_INC_DEV" ]; then
+	ls -sh $TARGET_INC_DEV
+    fi
     echo ""
     echo "ROM finished."
     
@@ -118,6 +121,7 @@ function init_rom() {
 	    TARGET=$TOP/build/$OSARMOD_TYPE/ionix-rom-$MODEL-$VERSION_NUM-dev$N-signed.zip
 	done
 	TARGET_INC=$TOP/build/$OSARMOD_TYPE/incremental-dev.zip
+	TARGET_INC_DEV=$TOP/build/$OSARMOD_TYPE/incremental-dev.zip
 	VERSION_NUM=$VERSION_NUM-dev$N
     else
 	TARGET=$TOP/build/$OSARMOD_TYPE/ionix-rom-$MODEL-$VERSION_NUM-signed.zip
@@ -281,28 +285,45 @@ function create_packages() {
     echo "Creating full package..."
     cd $REPACK
     zip -q -r $OUT/tmposarrom.zip .
+    cd -
 
-    echo "Signing zip..."
+    echo "Signing $TARGET..."
     rm -f $TARGET
     signzip $OUT/tmposarrom.zip $TARGET
     
-    echo "Unpacking previous package..."
-    rm -rf /tmp/prev
     if [ "$DEVBUILD" != "1" ]; then
+	echo "Unpacking previous package..."
+	rm -rf /tmp/prev
 	unzip -q $TOP/build/$OSARMOD_TYPE/latest -d /tmp/prev
-    else
-	unzip -q $TOP/build/$OSARMOD_TYPE/latest_dev -d /tmp/prev
+
+	echo "Creating incremental package..."
+	generate_incremental_package /tmp/prev $REPACK $REPACK_INC
+	cd $REPACK_INC
+	rm -f $OUT/tmposarrom.zip
+	zip -q -r $OUT/tmposarrom.zip .
+	cd -
+	
+	echo "Signing $TARGET_INC..."
+	rm -f $TARGET_INC
+	signzip $OUT/tmposarrom.zip $TARGET_INC
     fi
+
+    # always build an incremental dev package
+    echo "Unpacking previous package (dev)..."
+    rm -rf /tmp/prev
+    unzip -q $TOP/build/$OSARMOD_TYPE/latest_dev -d /tmp/prev
     
-    echo "Creating incremental package..."
+    echo "Creating incremental package (dev)..."
     generate_incremental_package /tmp/prev $REPACK $REPACK_INC
     cd $REPACK_INC
     rm -f $OUT/tmposarrom.zip
     zip -q -r $OUT/tmposarrom.zip .
-    
-    echo "Signing zip..."
-    rm -f $TARGET_INC
-    signzip $OUT/tmposarrom.zip $TARGET_INC
+    cd -
+
+    echo "Signing $TARGET_INC_DEV..."
+    rm -f $TARGET_INC_DEV
+    signzip $OUT/tmposarrom.zip $TARGET_INC_DEV
+
 }
 
 function cleanup() {
@@ -318,12 +339,10 @@ function cleanup() {
 	mv $TOP/build/$OSARMOD_TYPE/latest $TOP/build/$OSARMOD_TYPE/previous
 	ln -s $TARGET $TOP/build/$OSARMOD_TYPE/latest
         # update dev files
-	cp $TOP/build/$OSARMOD_TYPE/version_prev $TOP/build/$OSARMOD_TYPE/version_dev_prev
+	mv $TOP/build/$OSARMOD_TYPE/version_dev $TOP/build/$OSARMOD_TYPE/version_dev_prev
 	echo $VERSION_NUM > $TOP/build/$OSARMOD_TYPE/version_dev
 	mv $TOP/build/$OSARMOD_TYPE/latest_dev $TOP/build/$OSARMOD_TYPE/previous_dev
 	ln -s $TARGET $TOP/build/$OSARMOD_TYPE/latest_dev
-	rm -f $TARGET_INC_DEV
-	ln -s $TARGET_INC $TARGET_INC_DEV
     else
         # update build dir 
 	mv $TOP/build/$OSARMOD_TYPE/version_dev $TOP/build/$OSARMOD_TYPE/version_dev_prev
@@ -341,6 +360,8 @@ function cleanup() {
     if [ -e /tmp/GIT_KLOG ]; then
 	mv /tmp/GIT_KLOG $TOP/logs/GIT_KLOG_${OSARMOD_TYPE}_$VERSION_NUM
     fi
+    # move old files into the archive directory
+    buildarchive.pl $TOP/build/$OSARMOD_TYPE
 }
 
 main $*
