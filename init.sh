@@ -12,7 +12,8 @@ if [ -z $OSARMOD_INIT ]; then
     echo ""
     echo "Android 4.2:"
     echo "  [2] Nexus 4"
-    echo "  [3] Xoom (US WiFi)"
+    echo "  [3] Nexus 7 (WIFI)"
+    echo "  [4] Xoom (US WiFi)"
     echo ""
     echo -n "Choose target [none]: "
     read N
@@ -38,6 +39,14 @@ case $N in
 	os=4.2
 	;;
     3)
+	target=grouper
+	init=breakfast
+	system=android/system_jb
+	device=grouper
+	device_common=
+	os=4.2
+	;;
+    4)
 	target=wingray
 	init=breakfast
 	system=android/system_jb
@@ -90,7 +99,7 @@ alias sc_all="show_changelog.sh -nodevs -all | less"
 alias rs8="repo sync -j8"
 alias devbuild="DEVBUILD=1 buildall.sh"
 alias releasebuild="buildall.sh"
-alias make_kernel='CROSS_COMPILE=$ARM_EABI_TOOLCHAIN/arm-eabi- ARCH=arm SUBARCH=arm make -j8'
+alias make_kernel='CCACHE=$ANDROID_BUILD_TOP/prebuilts/misc/linux-x86/ccache/ccache CROSS_COMPILE=$ARM_EABI_TOOLCHAIN/arm-eabi- O=build ARCH=arm SUBARCH=arm make -j8'
 
 alias edit_changelog="emacs $HOME/android/osarmod/CHANGELOG_${OSARMOD_TYPE}_NEW"
 alias edit_romversion="emacs $HOME/android/osarmod/files/VERSION_ROM_${OSARMOD_TYPE}"
