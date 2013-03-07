@@ -292,37 +292,41 @@ function create_packages() {
     signzip $OUT/tmposarrom.zip $TARGET
     
     if [ "$DEVBUILD" != "1" ]; then
-	echo "Unpacking previous package..."
-	rm -rf /tmp/prev
-	unzip -q $TOP/build/$OSARMOD_TYPE/latest -d /tmp/prev
+	if [ -e $TOP/build/$OSARMOD_TYPE/latest ]; then
+	    echo "Unpacking previous package..."
+	    rm -rf /tmp/prev
+	    unzip -q $TOP/build/$OSARMOD_TYPE/latest -d /tmp/prev
 
-	echo "Creating incremental package..."
+	    echo "Creating incremental package..."
+	    generate_incremental_package /tmp/prev $REPACK $REPACK_INC
+	    cd $REPACK_INC
+	    rm -f $OUT/tmposarrom.zip
+	    zip -q -r $OUT/tmposarrom.zip .
+	    cd -
+	
+	    echo "Signing $TARGET_INC..."
+	    rm -f $TARGET_INC
+	    signzip $OUT/tmposarrom.zip $TARGET_INC
+	fi
+    fi
+
+    # always build an incremental dev package
+    if [ -e $TOP/build/$OSARMOD_TYPE/latest_dev ]; then
+	echo "Unpacking previous package (dev)..."
+	rm -rf /tmp/prev
+	unzip -q $TOP/build/$OSARMOD_TYPE/latest_dev -d /tmp/prev
+	
+	echo "Creating incremental package (dev)..."
 	generate_incremental_package /tmp/prev $REPACK $REPACK_INC
 	cd $REPACK_INC
 	rm -f $OUT/tmposarrom.zip
 	zip -q -r $OUT/tmposarrom.zip .
 	cd -
 	
-	echo "Signing $TARGET_INC..."
-	rm -f $TARGET_INC
-	signzip $OUT/tmposarrom.zip $TARGET_INC
+	echo "Signing $TARGET_INC_DEV..."
+	rm -f $TARGET_INC_DEV
+	signzip $OUT/tmposarrom.zip $TARGET_INC_DEV
     fi
-
-    # always build an incremental dev package
-    echo "Unpacking previous package (dev)..."
-    rm -rf /tmp/prev
-    unzip -q $TOP/build/$OSARMOD_TYPE/latest_dev -d /tmp/prev
-    
-    echo "Creating incremental package (dev)..."
-    generate_incremental_package /tmp/prev $REPACK $REPACK_INC
-    cd $REPACK_INC
-    rm -f $OUT/tmposarrom.zip
-    zip -q -r $OUT/tmposarrom.zip .
-    cd -
-
-    echo "Signing $TARGET_INC_DEV..."
-    rm -f $TARGET_INC_DEV
-    signzip $OUT/tmposarrom.zip $TARGET_INC_DEV
 
 }
 
@@ -334,19 +338,31 @@ function cleanup() {
 	touch $TOP/CHANGELOG_${OSARMOD_TYPE}_NEW
 	
         # update build dir 
-	mv $TOP/build/$OSARMOD_TYPE/version $TOP/build/$OSARMOD_TYPE/version_prev
+	if [ -e $TOP/build/$OSARMOD_TYPE/version ]; then
+	    mv $TOP/build/$OSARMOD_TYPE/version $TOP/build/$OSARMOD_TYPE/version_prev
+	fi
 	cp $TOP/files/VERSION_ROM_$OSARMOD_TYPE $TOP/build/$OSARMOD_TYPE/version
-	mv $TOP/build/$OSARMOD_TYPE/latest $TOP/build/$OSARMOD_TYPE/previous
+	if [ -e  $TOP/build/$OSARMOD_TYPE/latest ]; then
+	    mv $TOP/build/$OSARMOD_TYPE/latest $TOP/build/$OSARMOD_TYPE/previous
+	fi
 	ln -s $TARGET $TOP/build/$OSARMOD_TYPE/latest
         # update dev files
-	mv $TOP/build/$OSARMOD_TYPE/version_dev $TOP/build/$OSARMOD_TYPE/version_dev_prev
+	if [ -e $TOP/build/$OSARMOD_TYPE/version_dev ]; then
+	    mv $TOP/build/$OSARMOD_TYPE/version_dev $TOP/build/$OSARMOD_TYPE/version_dev_prev
+	fi
 	echo $VERSION_NUM > $TOP/build/$OSARMOD_TYPE/version_dev
-	mv $TOP/build/$OSARMOD_TYPE/latest_dev $TOP/build/$OSARMOD_TYPE/previous_dev
+	if [ -e $TOP/build/$OSARMOD_TYPE/latest_dev ]; then
+	    mv $TOP/build/$OSARMOD_TYPE/latest_dev $TOP/build/$OSARMOD_TYPE/previous_dev
+	fi
 	ln -s $TARGET $TOP/build/$OSARMOD_TYPE/latest_dev
     else
         # update build dir 
-	mv $TOP/build/$OSARMOD_TYPE/version_dev $TOP/build/$OSARMOD_TYPE/version_dev_prev
-	mv $TOP/build/$OSARMOD_TYPE/latest_dev $TOP/build/$OSARMOD_TYPE/previous_dev
+	if [ -e $TOP/build/$OSARMOD_TYPE/version_dev ]; then
+	    mv $TOP/build/$OSARMOD_TYPE/version_dev $TOP/build/$OSARMOD_TYPE/version_dev_prev
+	fi
+	if [ -e $TOP/build/$OSARMOD_TYPE/latest_dev ]; then
+	    mv $TOP/build/$OSARMOD_TYPE/latest_dev $TOP/build/$OSARMOD_TYPE/previous_dev
+	fi
 	echo $VERSION_NUM > $TOP/build/$OSARMOD_TYPE/version_dev
 	rm -f $TOP/build/$OSARMOD_TYPE/latest_dev
 	ln -s $TARGET $TOP/build/$OSARMOD_TYPE/latest_dev
