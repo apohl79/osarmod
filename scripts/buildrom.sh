@@ -115,11 +115,25 @@ function init_rom() {
     GAPPS_ALT=$TOP/gapps_$OSARMOD_OS
     if [ "$DEVBUILD" = "1" ]; then
 	N=1
-	TARGET=$TOP/build/$OSARMOD_TYPE/ionix-rom-$MODEL-$VERSION_NUM-dev$N-signed.zip
-	while [ -e $TARGET ]; do
-	    let N++
-	    TARGET=$TOP/build/$OSARMOD_TYPE/ionix-rom-$MODEL-$VERSION_NUM-dev$N-signed.zip
-	done
+	if [ -n "$(ls $TOP/build/$OSARMOD_TYPE/ionix-rom-$MODEL-$VERSION_NUM-dev*-signed.zip 2>/dev/null)" ]; then
+	    found_first=0
+	    found_next=0
+	    while [ $found_next = 0 ]; do
+		TARGET=$TOP/build/$OSARMOD_TYPE/ionix-rom-$MODEL-$VERSION_NUM-dev$N-signed.zip
+		if [ -e $TARGET ]; then
+		    if [ $found_first = 0 ]; then
+			found_first=1
+		    fi
+		    let N++
+		else
+		    if [ $found_first = 1 ]; then
+			found_next=1
+		    else
+			let N++
+		    fi
+		fi
+	    done
+	fi
 	TARGET_INC=$TOP/build/$OSARMOD_TYPE/incremental-dev.zip
 	TARGET_INC_DEV=$TOP/build/$OSARMOD_TYPE/incremental-dev.zip
 	VERSION_NUM=$VERSION_NUM-dev$N
