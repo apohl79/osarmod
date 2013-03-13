@@ -13,7 +13,8 @@ if [ -z $OSARMOD_INIT ]; then
     echo "Android 4.2:"
     echo "  [2] Nexus 4"
     echo "  [3] Nexus 7 (WIFI)"
-    echo "  [4] Xoom (US WiFi)"
+    echo "  [4] Nexus 7 (GSM)"
+    echo "  [5] Xoom (US WiFi)"
     echo ""
     echo -n "Choose target [none]: "
     read N
@@ -47,6 +48,14 @@ case $N in
 	os=4.2
 	;;
     4)
+	target=tilapia
+	init=breakfast
+	system=android/system_jb
+	device=tilapia
+	device_common=
+	os=4.2
+	;;
+    5)
 	target=wingray
 	init=breakfast
 	system=android/system_jb
