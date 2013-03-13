@@ -21,9 +21,9 @@ function main() {
 
     echo ""
     ls -sh $TARGET
-    ls -sh $TARGET_INC
+    ls -sh $TARGET_INC 2>/dev/null
     if [ "$TARGET_INC" != "$TARGET_INC_DEV" ]; then
-	ls -sh $TARGET_INC_DEV
+	ls -sh $TARGET_INC_DEV 2>/dev/null
     fi
     echo ""
     echo "ROM finished."
