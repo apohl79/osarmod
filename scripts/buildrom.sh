@@ -20,7 +20,7 @@ function main() {
     cleanup
 
     echo ""
-    ls -sh $TARGET
+    ls -sh $TARGET 2>/dev/null
     ls -sh $TARGET_INC 2>/dev/null
     if [ "$TARGET_INC" != "$TARGET_INC_DEV" ]; then
 	ls -sh $TARGET_INC_DEV 2>/dev/null
@@ -93,7 +93,7 @@ function init_rom() {
 
     omsettitle "[Building] ${OSARMOD_TYPE} (generating version/changelog)..."
     VERSION_NUM_OLD=$(cat $TOP/files/VERSION_ROM_$OSARMOD_TYPE)
-    if [ $NO_COMPILE = 1 ]; then
+    if [ "$NO_COMPILE" = "1" ]; then
 	VERSION_NUM=$(cat $TOP/files/VERSION_ROM_$OSARMOD_TYPE)
         #GIT_LOG=$TOP/GIT_LOG_${OSARMOD_TYPE}_$VERSION_NUM
         # changelog - compare with old git hashes
@@ -133,6 +133,8 @@ function init_rom() {
 		    fi
 		fi
 	    done
+	else
+	    TARGET=$TOP/build/$OSARMOD_TYPE/ionix-rom-$MODEL-$VERSION_NUM-dev$N-signed.zip
 	fi
 	TARGET_INC=$TOP/build/$OSARMOD_TYPE/incremental-dev.zip
 	TARGET_INC_DEV=$TOP/build/$OSARMOD_TYPE/incremental-dev.zip
@@ -159,7 +161,7 @@ function compile() {
     BUILDCMD="mka bacon"
     export CYANOGEN_RELEASE=1 
 
-    if [ $NO_COMPILE = 1 ]; then
+    if [ "$NO_COMPILE" = "1" ]; then
 	echo "Building Android..."
 	if [ "$1" = "-clean" ]; then
 	    $CLEANCMD
@@ -167,7 +169,7 @@ function compile() {
 	$BUILDCMD
 	OTAZIP=$(ls -1 $OUT/$OTAFILE|tail -1)
     else
-	if [ $OTA_BUILD = 1 ]; then
+	if [ "$OTA_BUILD" = "1" ]; then
 	    OTAZIP=$OTA_PARAM_ZIP
 	    if [ ! -e $OTAZIP ]; then
 		echo "$OTAZIP not found"
@@ -295,6 +297,13 @@ function generate_incremental_package() {
     cp $ROMROOT/$MODEL-${OSARMOD_OS}.ext/updater-script.inc $out/META-INF/com/google/android/updater-script
 }
 
+function sign_package() {
+    java -Xmx1024m -jar $ANDROID_BUILD_TOP/prebuilts/sdk/tools/lib/signapk.jar \
+	-w $ANDROID_BUILD_TOP/build/target/product/security/testkey.x509.pem \
+	$ANDROID_BUILD_TOP/build/target/product/security/testkey.pk8 \
+	$*
+}
+
 function create_packages() {
     echo "Creating full package..."
     cd $REPACK
@@ -303,7 +312,7 @@ function create_packages() {
 
     echo "Signing $TARGET..."
     rm -f $TARGET
-    signzip $OUT/tmposarrom.zip $TARGET
+    sign_package $OUT/tmposarrom.zip $TARGET
     
     if [ "$DEVBUILD" != "1" ]; then
 	if [ -e $TOP/build/$OSARMOD_TYPE/latest ]; then
@@ -316,11 +325,11 @@ function create_packages() {
 	    cd $REPACK_INC
 	    rm -f $OUT/tmposarrom.zip
 	    zip -q -r $OUT/tmposarrom.zip .
-	    cd -
+	    cd - >/dev/null
 	
 	    echo "Signing $TARGET_INC..."
 	    rm -f $TARGET_INC
-	    signzip $OUT/tmposarrom.zip $TARGET_INC
+	    sign_package $OUT/tmposarrom.zip $TARGET_INC
 	fi
     fi
 
@@ -335,11 +344,11 @@ function create_packages() {
 	cd $REPACK_INC
 	rm -f $OUT/tmposarrom.zip
 	zip -q -r $OUT/tmposarrom.zip .
-	cd -
+	cd - >/dev/null
 	
 	echo "Signing $TARGET_INC_DEV..."
 	rm -f $TARGET_INC_DEV
-	signzip $OUT/tmposarrom.zip $TARGET_INC_DEV
+	sign_package $OUT/tmposarrom.zip $TARGET_INC_DEV
     fi
 
 }
