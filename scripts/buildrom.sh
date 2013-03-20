@@ -225,7 +225,9 @@ function add_additional_files() {
     find $ROMROOT/$MODEL-$OSARMOD_OS/ -type f | perl -ne "s|$ROMROOT/$MODEL-$OSARMOD_OS/||; print '  [+] '.\$_"
     cp -r $ROMROOT/$MODEL-$OSARMOD_OS/* $REPACK
     
-    cat $ROMROOT/$MODEL-${OSARMOD_OS}.ext/updater-script >> $REPACK/META-INF/com/google/android/updater-script
+    if [ -e $ROMROOT/$MODEL-${OSARMOD_OS}.ext/updater-script ]; then
+	cat $ROMROOT/$MODEL-${OSARMOD_OS}.ext/updater-script >> $REPACK/META-INF/com/google/android/updater-script
+    fi
     if [ -x $ROMROOT/$MODEL-${OSARMOD_OS}.ext/run.sh ]; then
 	REPACK=$REPACK $ROMROOT/$MODEL-${OSARMOD_OS}.ext/run.sh
     fi
@@ -308,7 +310,7 @@ function create_packages() {
     echo "Creating full package..."
     cd $REPACK
     zip -q -r $OUT/tmposarrom.zip .
-    cd -
+    cd - >/dev/null
 
     echo "Signing $TARGET..."
     rm -f $TARGET
