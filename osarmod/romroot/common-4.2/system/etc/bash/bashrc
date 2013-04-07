@@ -52,3 +52,7 @@ export PATH=$PATH:/data/devel/bin
 # Try to keep environment pollution down, EPA loves us.
 unset use_color safe_term match_lhs
 
+# import user config
+if [ -e /sdcard/bashrc ]; then
+   . /sdcard/bashrc 
+fi
